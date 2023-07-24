@@ -26,6 +26,7 @@ Linux:
 
 ```bash
 git clone https://github.com/mgh5225/PDB-ANN.git
+cd PDB-ANN
 bash build.sh
 ```
 
