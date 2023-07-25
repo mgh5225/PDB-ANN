@@ -10,7 +10,7 @@
 
 ## Overview
 
-The PDB-ANN project aims to implement one of the methodologies mentioned in the research paper - [Optimal Search with Neural Networks: Challenges and Approaches](https://webdocs.cs.ualberta.ca/~nathanst/papers/li2022optimalnn.pdf). This project is designed to provide an optimal search solution using neural networks.
+The PDB-ANN project aims to implement one of the methodologies mentioned in the research paper - [Optimal Search with Neural Networks: Challenges and Approaches](https://webdocs.cs.ualberta.ca/~nathanst/papers/li2022optimalnn.pdf).
 
 ## Requirements
 
