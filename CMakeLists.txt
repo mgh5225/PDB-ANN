@@ -4,7 +4,9 @@ project(PDB-ANN)
 find_package(Torch REQUIRED)
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${TORCH_CXX_FLAGS}")
 
-add_executable(main main.cpp)
+include_directories(lib)
+file(GLOB_RECURSE LIBS "lib/*.cpp")
+add_executable(main src/main.cpp ${LIBS})
 target_link_libraries(main "${TORCH_LIBRARIES}")
 set_property(TARGET main PROPERTY CXX_STANDARD 17)
 

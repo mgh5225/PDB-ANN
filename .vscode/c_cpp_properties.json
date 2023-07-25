@@ -3,8 +3,9 @@
         {
             "name": "Linux",
             "includePath": [
+                "~/Libs/**",
                 "${workspaceFolder}/**",
-                "/home/patrick/Libs/**"
+                "${workspaceFolder}/include/**"
             ],
             "defines": [],
             "compilerPath": "/usr/bin/clang",

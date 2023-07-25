@@ -1,6 +1,6 @@
 #!/bin/bash
 
-LIBTORCH=/home/patrick/Libs/libtorch
+LIBTORCH=~/Libs/libtorch
 
 [ ! -d ./build ] && mkdir build
 
