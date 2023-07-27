@@ -1,20 +1,23 @@
 #ifndef PDB_ANN_PDB
 #define PDB_ANN_PDB
 
+#include <torch/torch.h>
+
 #include <iostream>
-#include <map>
-#include <string>
+#include <vector>
 
 #include "stp/stp.hpp"
 
 class PDB
 {
 private:
-  std::map<unsigned int, int> table;
+  torch::Tensor _table;
+  torch::Tensor _pattern;
 
 public:
-  PDB();
-  void generatePDB(STP goalSTP, std::string pattern);
+  PDB(STP goalSTP, std::vector<int> pattern);
+  int size();
+  void fill();
 };
 
 #endif
