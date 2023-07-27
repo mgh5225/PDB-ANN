@@ -24,9 +24,6 @@ public:
   torch::Tensor getFlattenState(std::vector<int> pattern);
   int hashState(std::optional<torch::Tensor> pi_optional = std::nullopt);
   int hashState(std::vector<int> pattern);
-
-private:
-  int rank(torch::Scalar n, torch::Tensor pi, torch::Tensor pi_1);
 };
 
 #endif

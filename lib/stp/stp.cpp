@@ -93,43 +93,35 @@ int STP::hashState(std::optional<torch::Tensor> pi_optional)
 
   int pi_size = pi.size(0);
 
+  int k = static_cast<int>(std::log2f(pi_size));
+
   auto options = torch::TensorOptions().dtype(torch::kInt);
-  torch::Tensor pi_1 = torch::zeros({pi_size}, options);
+  torch::Tensor pi_1 = torch::zeros({((1 << (1 + k)) - 1)}, options);
+
+  int rank = 0;
 
   for (int i = 0; i < pi_size; i++)
   {
-    pi_1[pi[i]] = i;
+    int counter = pi[i].item<int>();
+    int node = (1 << k) - 1 + counter;
+
+    for (int j = 0; j < k; j++)
+    {
+      int isEven = (1 - (node & 1));
+      counter -= isEven * (pi_1[(node - 1) >> 1].item<int>() - pi_1[node].item<int>());
+      pi_1[node] += 1;
+      node = (node - 1) >> 1;
+    }
+    pi_1[node] += 1;
+    rank = rank * (size() - i) + counter;
   }
 
-  torch::Scalar n = torch::Scalar(pi_size);
-
-  return rank(n, pi, pi_1);
+  return rank;
 }
 
 int STP::hashState(std::vector<int> pattern)
 {
   torch::Tensor pi = getFlattenState(pattern);
+
   return hashState(pi);
-}
-
-int STP::rank(torch::Scalar n, torch::Tensor pi, torch::Tensor pi_1)
-{
-  if (n.equal(1))
-    return 0;
-
-  int s = pi[n.toInt() - 1].item<int>();
-
-  int a = pi[n.toInt() - 1].item<int>();
-  int b = pi[pi_1[n.toInt() - 1]].item<int>();
-
-  pi[n.toInt() - 1] = b;
-  pi[pi_1[n.toInt() - 1]] = a;
-
-  a = pi_1[s].item<int>();
-  b = pi_1[n.toInt() - 1].item<int>();
-
-  pi_1[s] = b;
-  pi_1[n.toInt() - 1] = a;
-
-  return s + n.toInt() * rank(n.toInt() - 1, pi, pi_1);
 }
