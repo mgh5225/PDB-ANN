@@ -1,6 +1,6 @@
 #include "stp.hpp"
 
-STP::STP(unsigned int width, unsigned int height)
+STP::STP(int width, int height)
 {
   _width = width;
   _height = height;
@@ -8,6 +8,7 @@ STP::STP(unsigned int width, unsigned int height)
   auto options = torch::TensorOptions().dtype(torch::kInt);
 
   _state = torch::zeros({_height, _width}, options);
+  _blank = 0;
 }
 
 int STP::size()
@@ -27,9 +28,11 @@ void STP::initGoal()
     if (j == 0)
       i++;
   }
+
+  _blank = 0;
 }
 
-void STP::initState(int *state)
+void STP::initState(std::vector<int> state)
 {
   int i = 0;
   int j = 0;
@@ -40,6 +43,9 @@ void STP::initState(int *state)
     j %= _width;
     if (j == 0)
       i++;
+
+    if (state[n] == 0)
+      _blank = n;
   }
 }
 
@@ -51,6 +57,19 @@ void STP::initState(torch::Tensor state)
 torch::Tensor STP::getState()
 {
   return _state;
+}
+
+void STP::toAbstract(std::vector<int> pattern)
+{
+  std::vector<int> state = std::vector<int>(size(), -1);
+  torch::Tensor f_state = getFlattenState(true);
+
+  for (int i = 0; i < pattern.size(); i++)
+  {
+    state[f_state[pattern[i]].item<int>()] = pattern[i];
+  }
+
+  initState(state);
 }
 
 torch::Tensor STP::getFlattenState(bool by_pos)
@@ -124,4 +143,63 @@ int STP::hashState(std::vector<int> pattern)
   torch::Tensor pi = getFlattenState(pattern);
 
   return hashState(pi);
+}
+
+bool STP::move(STPAction action)
+{
+  int x_b = static_cast<int>(_blank / _width);
+  int y_b = _blank % _width;
+
+  switch (action)
+  {
+  case UP:
+    if (x_b > 0)
+    {
+      int tmp = _state[x_b - 1][y_b].item<int>();
+      _state[x_b - 1][y_b] = 0;
+      _state[x_b][y_b] = tmp;
+      _blank = (x_b - 1) * _width + y_b;
+    }
+    else
+      return false;
+    break;
+  case RIGHT:
+    if (y_b < _width - 1)
+    {
+      int tmp = _state[x_b][y_b + 1].item<int>();
+      _state[x_b][y_b + 1] = 0;
+      _state[x_b][y_b] = tmp;
+      _blank = (x_b)*_width + (y_b + 1);
+    }
+    else
+      return false;
+    break;
+  case DOWN:
+    if (x_b < _height - 1)
+    {
+      int tmp = _state[x_b + 1][y_b].item<int>();
+      _state[x_b + 1][y_b] = 0;
+      _state[x_b][y_b] = tmp;
+      _blank = (x_b + 1) * _width + y_b;
+    }
+    else
+      return false;
+    break;
+  case LEFT:
+    if (y_b > 0)
+    {
+      int tmp = _state[x_b][y_b - 1].item<int>();
+      _state[x_b][y_b - 1] = 0;
+      _state[x_b][y_b] = tmp;
+      _blank = (x_b)*_width + (y_b - 1);
+    }
+    else
+      return false;
+    break;
+
+  default:
+    return false;
+  }
+
+  return true;
 }
