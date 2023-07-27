@@ -1,12 +1,14 @@
 #include <torch/torch.h>
 #include <iostream>
 
-#include "model/model.hpp"
+#include "stp/stp.hpp"
 
 int main()
 {
-  torch::Tensor tensor = torch::rand({2, 3});
-  std::cout << tensor << std::endl;
+  STP puzzle = STP(2, 2);
 
-  QNT_5_5 *model = new QNT_5_5();
+  int state[4] = {0, 1, 2, 3};
+  puzzle.initState(state);
+
+  std::cout << puzzle.hashState() << std::endl;
 }

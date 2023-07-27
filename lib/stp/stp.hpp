@@ -15,8 +15,13 @@ public:
   STP(unsigned int width, unsigned int height);
   void initGoal();
   void initState(torch::Tensor state);
+  void initState(int *state);
   torch::Tensor getState();
-  unsigned int hashState();
+  torch::Tensor getFlattenState();
+  int hashState();
+
+private:
+  int rank(torch::Scalar n, torch::Tensor pi, torch::Tensor pi_1);
 };
 
 #endif
