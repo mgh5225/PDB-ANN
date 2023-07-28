@@ -4,6 +4,7 @@
 #include <torch/torch.h>
 #include <iostream>
 #include <vector>
+#include <tuple>
 #include <optional>
 
 enum STPAction
@@ -36,6 +37,7 @@ public:
   int hashState(std::optional<torch::Tensor> pi_optional = std::nullopt);
   int hashState(std::vector<int> pattern);
   bool move(STPAction action);
+  std::optional<std::tuple<torch::Tensor,int>> nextState(STPAction action, int tile);
 };
 
 #endif

@@ -147,59 +147,72 @@ int STP::hashState(std::vector<int> pattern)
 
 bool STP::move(STPAction action)
 {
-  int x_b = static_cast<int>(_blank / _width);
-  int y_b = _blank % _width;
+  auto res = nextState(action, _blank);
+  if (res.has_value())
+  {
+    initState(std::get<torch::Tensor>(res.value()));
+    _blank = std::get<int>(res.value());
+  }
+  return false;
+}
+
+std::optional<std::tuple<torch::Tensor, int>> STP::nextState(STPAction action, int tile)
+{
+  int x_t = static_cast<int>(tile / _width);
+  int y_t = tile % _width;
+
+  torch::Tensor n_state = 1 * getState();
 
   switch (action)
   {
   case UP:
-    if (x_b > 0)
+    if (x_t > 0)
     {
-      int tmp = _state[x_b - 1][y_b].item<int>();
-      _state[x_b - 1][y_b] = 0;
-      _state[x_b][y_b] = tmp;
-      _blank = (x_b - 1) * _width + y_b;
+      int tmp = n_state[x_t - 1][y_t].item<int>();
+      n_state[x_t - 1][y_t] = 0;
+      n_state[x_t][y_t] = tmp;
+      tile = (x_t - 1) * _width + y_t;
     }
     else
-      return false;
+      return std::nullopt;
     break;
   case RIGHT:
-    if (y_b < _width - 1)
+    if (y_t < _width - 1)
     {
-      int tmp = _state[x_b][y_b + 1].item<int>();
-      _state[x_b][y_b + 1] = 0;
-      _state[x_b][y_b] = tmp;
-      _blank = (x_b)*_width + (y_b + 1);
+      int tmp = n_state[x_t][y_t + 1].item<int>();
+      n_state[x_t][y_t + 1] = 0;
+      n_state[x_t][y_t] = tmp;
+      tile = (x_t)*_width + (y_t + 1);
     }
     else
-      return false;
+      return std::nullopt;
     break;
   case DOWN:
-    if (x_b < _height - 1)
+    if (x_t < _height - 1)
     {
-      int tmp = _state[x_b + 1][y_b].item<int>();
-      _state[x_b + 1][y_b] = 0;
-      _state[x_b][y_b] = tmp;
-      _blank = (x_b + 1) * _width + y_b;
+      int tmp = n_state[x_t + 1][y_t].item<int>();
+      n_state[x_t + 1][y_t] = 0;
+      n_state[x_t][y_t] = tmp;
+      tile = (x_t + 1) * _width + y_t;
     }
     else
-      return false;
+      return std::nullopt;
     break;
   case LEFT:
-    if (y_b > 0)
+    if (y_t > 0)
     {
-      int tmp = _state[x_b][y_b - 1].item<int>();
-      _state[x_b][y_b - 1] = 0;
-      _state[x_b][y_b] = tmp;
-      _blank = (x_b)*_width + (y_b - 1);
+      int tmp = n_state[x_t][y_t - 1].item<int>();
+      n_state[x_t][y_t - 1] = 0;
+      n_state[x_t][y_t] = tmp;
+      tile = (x_t)*_width + (y_t - 1);
     }
     else
-      return false;
+      return std::nullopt;
     break;
 
   default:
-    return false;
+    return std::nullopt;
   }
 
-  return true;
+  return std::tuple<torch::Tensor, int>({n_state, tile});
 }
