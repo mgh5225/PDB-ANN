@@ -34,19 +34,22 @@ void PDB::fill()
     STP front = frontier.front();
     frontier.pop();
 
-    std::vector<STP> successors = front.getSuccessors(front.blank());
+    std::vector<std::tuple<STP, int>> successors = front.getSuccessors(front.blank());
 
     int h_f = _table[front.hashState(_pattern)].item<int>();
 
     for (auto &successor : successors)
     {
-      int idx_s = successor.hashState(_pattern);
-      int h_s = h_f + 1;
+      STP stp = std::get<STP>(successor);
+      int cost = std::get<int>(successor);
+
+      int idx_s = stp.hashState(_pattern);
+      int h_s = h_f + cost;
 
       if (_table[idx_s].item<int>() == -1)
       {
         _table[idx_s] = h_s;
-        frontier.push(successor);
+        frontier.push(stp);
       }
     }
   }

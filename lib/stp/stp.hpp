@@ -30,6 +30,7 @@ public:
   STP(const STP &_stp);
   int size();
   int blank();
+  int getTile(int tile);
   void initGoal();
   void initState(torch::Tensor state);
   void initState(std::vector<int> state);
@@ -42,7 +43,7 @@ public:
   bool move(STPAction action);
   std::optional<std::tuple<torch::Tensor, int>> nextState(STPAction action, int tile);
   std::vector<STPAction> getActions(int tile);
-  std::vector<STP> getSuccessors(int tile);
+  std::vector<std::tuple<STP, int>> getSuccessors(int tile);
 };
 
 #endif

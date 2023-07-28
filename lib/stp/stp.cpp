@@ -45,6 +45,14 @@ int STP::blank()
   return _blank;
 }
 
+int STP::getTile(int tile)
+{
+  int x_t = static_cast<int>(tile / _width);
+  int y_t = tile % _width;
+
+  return _state[x_t][y_t].item<int>();
+}
+
 void STP::initGoal()
 {
   int i = 0;
@@ -265,10 +273,10 @@ std::vector<STPAction> STP::getActions(int tile)
   return actions;
 }
 
-std::vector<STP> STP::getSuccessors(int tile)
+std::vector<std::tuple<STP, int>> STP::getSuccessors(int tile)
 {
   std::vector<STPAction> actions = getActions(tile);
-  std::vector<STP> successors = std::vector<STP>();
+  std::vector<std::tuple<STP, int>> successors = std::vector<std::tuple<STP, int>>();
 
   for (auto &action : actions)
   {
@@ -276,8 +284,10 @@ std::vector<STP> STP::getSuccessors(int tile)
     if (n_state.has_value())
     {
       STP n_stp = STP(_width, _height);
+      int n_tile = std::get<int>(n_state.value());
+      int n_cost = getTile(n_tile) == -1 ? 0 : 1;
       n_stp.initState(std::get<torch::Tensor>(n_state.value()));
-      successors.push_back(n_stp);
+      successors.push_back({n_stp, n_cost});
     }
   }
 
