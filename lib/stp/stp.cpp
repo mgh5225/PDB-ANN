@@ -16,6 +16,11 @@ int STP::size()
   return _width * _height;
 }
 
+int STP::blank()
+{
+  return _blank;
+}
+
 void STP::initGoal()
 {
   int i = 0;
@@ -215,4 +220,40 @@ std::optional<std::tuple<torch::Tensor, int>> STP::nextState(STPAction action, i
   }
 
   return std::tuple<torch::Tensor, int>({n_state, tile});
+}
+
+std::vector<STPAction> STP::getActions(int tile)
+{
+  std::vector<STPAction> actions = std::vector<STPAction>();
+
+  int x_t = static_cast<int>(tile / _width);
+  int y_t = tile % _width;
+
+  if (x_t > 0)
+    actions.push_back(STPAction::UP);
+  if (y_t < _width - 1)
+    actions.push_back(STPAction::RIGHT);
+  if (x_t < _height - 1)
+    actions.push_back(STPAction::DOWN);
+  if (y_t > 0)
+    actions.push_back(STPAction::LEFT);
+
+  return actions;
+}
+
+std::vector<torch::Tensor> STP::getSuccessors(int tile)
+{
+  std::vector<STPAction> actions = getActions(tile);
+  std::vector<torch::Tensor> successors = std::vector<torch::Tensor>();
+
+  for (auto &action : actions)
+  {
+    auto n_state = nextState(action, tile);
+    if (n_state.has_value())
+    {
+      successors.push_back(std::get<torch::Tensor>(n_state.value()));
+    }
+  }
+
+  return successors;
 }
