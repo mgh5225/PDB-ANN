@@ -9,10 +9,11 @@ PDB::PDB(STP goalSTP, std::vector<int> pattern)
   }
 
   auto options = torch::TensorOptions().dtype(torch::kInt);
-  _table = torch::zeros({pdbSize}, options);
+  _table = torch::full({pdbSize}, -1, options);
 
-  goalSTP.toAbstract(pattern);
-  _pattern = goalSTP.getState();
+  _goal = STP(goalSTP);
+  _goal.toAbstract(pattern);
+  _pattern = pattern;
 }
 
 int PDB::size()
@@ -22,4 +23,31 @@ int PDB::size()
 
 void PDB::fill()
 {
+  std::queue<STP> frontier = std::queue<STP>();
+
+  frontier.push(_goal);
+
+  _table[_goal.hashState(_pattern)] = 0;
+
+  while (!frontier.empty())
+  {
+    STP front = frontier.front();
+    frontier.pop();
+
+    std::vector<STP> successors = front.getSuccessors(front.blank());
+
+    int h_f = _table[front.hashState(_pattern)].item<int>();
+
+    for (auto &successor : successors)
+    {
+      int idx_s = successor.hashState(_pattern);
+      int h_s = h_f + 1;
+
+      if (_table[idx_s].item<int>() == -1)
+      {
+        _table[idx_s] = h_s;
+        frontier.push(successor);
+      }
+    }
+  }
 }

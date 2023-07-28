@@ -1,5 +1,16 @@
 #include "stp.hpp"
 
+STP::STP()
+{
+  _width = 0;
+  _height = 0;
+
+  auto options = torch::TensorOptions().dtype(torch::kInt);
+
+  _state = torch::zeros({_height, _width}, options);
+  _blank = 0;
+}
+
 STP::STP(int width, int height)
 {
   _width = width;
@@ -9,6 +20,19 @@ STP::STP(int width, int height)
 
   _state = torch::zeros({_height, _width}, options);
   _blank = 0;
+}
+
+STP::STP(const STP &_stp)
+{
+  _width = _stp._width;
+  _height = _stp._height;
+
+  auto options = torch::TensorOptions().dtype(torch::kInt);
+
+  _state = torch::zeros({_height, _width}, options);
+  _blank = 0;
+
+  initState(_stp._state);
 }
 
 int STP::size()
@@ -241,17 +265,19 @@ std::vector<STPAction> STP::getActions(int tile)
   return actions;
 }
 
-std::vector<torch::Tensor> STP::getSuccessors(int tile)
+std::vector<STP> STP::getSuccessors(int tile)
 {
   std::vector<STPAction> actions = getActions(tile);
-  std::vector<torch::Tensor> successors = std::vector<torch::Tensor>();
+  std::vector<STP> successors = std::vector<STP>();
 
   for (auto &action : actions)
   {
     auto n_state = nextState(action, tile);
     if (n_state.has_value())
     {
-      successors.push_back(std::get<torch::Tensor>(n_state.value()));
+      STP n_stp = STP(_width, _height);
+      n_stp.initState(std::get<torch::Tensor>(n_state.value()));
+      successors.push_back(n_stp);
     }
   }
 

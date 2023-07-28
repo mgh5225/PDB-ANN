@@ -25,7 +25,9 @@ private:
   torch::Tensor _state;
 
 public:
+  STP();
   STP(int width, int height);
+  STP(const STP &_stp);
   int size();
   int blank();
   void initGoal();
@@ -40,7 +42,7 @@ public:
   bool move(STPAction action);
   std::optional<std::tuple<torch::Tensor, int>> nextState(STPAction action, int tile);
   std::vector<STPAction> getActions(int tile);
-  std::vector<torch::Tensor> getSuccessors(int tile);
+  std::vector<STP> getSuccessors(int tile);
 };
 
 #endif
