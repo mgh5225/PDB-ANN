@@ -44,6 +44,7 @@ public:
   std::optional<std::tuple<torch::Tensor, int>> nextState(STPAction action, int tile);
   std::vector<STPAction> getActions(int tile);
   std::vector<std::tuple<STP, int>> getSuccessors(int tile);
+  int getMDHeuristic(std::optional<torch::Tensor> state_optional = std::nullopt);
 };
 
 #endif

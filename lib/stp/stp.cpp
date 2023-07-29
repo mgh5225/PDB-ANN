@@ -313,3 +313,27 @@ std::vector<std::tuple<STP, int>> STP::getSuccessors(int tile)
 
   return successors;
 }
+
+int STP::getMDHeuristic(std::optional<torch::Tensor> state_optional)
+{
+  torch::Tensor state = state_optional.value_or(getState());
+
+  int h = 0;
+
+  for (int i = 0; i < _height; i++)
+  {
+    for (int j = 0; j < _width; j++)
+    {
+      int tile = state[i][j].item<int>();
+      if (tile == -1)
+        continue;
+
+      int x_t = static_cast<int>(tile / _width);
+      int y_t = tile % _width;
+
+      h += std::abs(x_t - i) + std::abs(y_t - j);
+    }
+  }
+
+  return h;
+}

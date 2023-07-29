@@ -63,10 +63,11 @@ void PDB::fill()
       if (_states[idx_s_with_zero])
         continue;
 
-      int cost = n_stp.getTile(tile) == -1 ? 0 : 1;
-
       int64_t idx_s = n_stp.hashState(_pattern);
-      int h_s = h_f + cost;
+
+      int h_md = front.getMDHeuristic() - n_stp.getMDHeuristic();
+
+      int h_s = h_f + 1 + h_md;
 
       if (_table[idx_s].item<int>() == -1)
         _table[idx_s] = h_s;
