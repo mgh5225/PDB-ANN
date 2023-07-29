@@ -7,10 +7,10 @@
 
 int main()
 {
-  STP puzzle = STP(5, 5);
+  STP puzzle = STP(3, 3);
   puzzle.initGoal();
 
-  std::vector<int> pattern = std::vector<int>({1, 2, 3, 4, 5, 6, 7});
+  std::vector<int> pattern = std::vector<int>({1, 2, 3, 4});
 
   PDB pdb = PDB(puzzle, pattern);
 

@@ -30,7 +30,7 @@ cd PDB-ANN
 bash build.sh
 ```
 
-Please be aware that you'll need to update the absolute path to Libtorch in the `build.sh` script.
+Please be aware that you'll need to update the absolute path to Libtorch in the `CMakeLists.txt` file.
 
 ## Usage
 
