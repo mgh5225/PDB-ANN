@@ -6,6 +6,7 @@
 #include <iostream>
 #include <vector>
 #include <queue>
+#include <algorithm>
 
 #include "stp/stp.hpp"
 
@@ -13,6 +14,7 @@ class PDB
 {
 private:
   torch::Tensor _table;
+  std::vector<bool> _states;
   std::vector<int> _pattern;
   STP _goal;
 

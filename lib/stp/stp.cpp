@@ -98,7 +98,7 @@ torch::Tensor STP::getState()
 
 void STP::toAbstract(std::vector<int> pattern)
 {
-  std::vector<int> state = std::vector<int>(size(), -1);
+  auto state = std::vector<int>(size(), -1);
   torch::Tensor f_state = getFlattenState(true);
 
   for (int i = 0; i < pattern.size(); i++)
@@ -116,10 +116,13 @@ torch::Tensor STP::getFlattenState(bool by_pos)
   if (by_pos)
   {
     auto options = torch::TensorOptions().dtype(torch::kInt);
-    torch::Tensor pos = torch::zeros({size()}, options);
+    torch::Tensor pos = torch::full({size()}, -1, options);
 
     for (int i = 0; i < size(); i++)
     {
+      if (f_state[i].item<int>() < 0)
+        continue;
+
       pos[f_state[i]] = i;
     }
 
@@ -175,14 +178,33 @@ int STP::hashState(std::optional<torch::Tensor> pi_optional)
   return rank;
 }
 
-int STP::hashState(std::vector<int> pattern)
+int STP::hashState(std::vector<int> pattern, std::optional<std::vector<int>> pi_helper)
 {
   torch::Tensor pi = getFlattenState(pattern);
+
+  if (pi_helper.has_value())
+  {
+    std::vector<int> h_pi = pi_helper.value();
+
+    int j = 0;
+    for (int i = 0; i < h_pi.size(); i++)
+    {
+      for (; j < pi.size(0); j++)
+      {
+        if (pi[j].item<int>() == -1)
+        {
+          pi[j] = h_pi[i];
+          j++;
+          break;
+        }
+      }
+    }
+  }
 
   return hashState(pi);
 }
 
-bool STP::move(STPAction action)
+bool STP::moveBlank(STPAction action)
 {
   auto res = nextState(action, _blank);
   if (res.has_value())
@@ -257,7 +279,7 @@ std::optional<std::tuple<torch::Tensor, int>> STP::nextState(STPAction action, i
 
 std::vector<STPAction> STP::getActions(int tile)
 {
-  std::vector<STPAction> actions = std::vector<STPAction>();
+  auto actions = std::vector<STPAction>();
 
   int x_t = static_cast<int>(tile / _width);
   int y_t = tile % _width;
@@ -277,7 +299,7 @@ std::vector<STPAction> STP::getActions(int tile)
 std::vector<std::tuple<STP, int>> STP::getSuccessors(int tile)
 {
   std::vector<STPAction> actions = getActions(tile);
-  std::vector<std::tuple<STP, int>> successors = std::vector<std::tuple<STP, int>>();
+  auto successors = std::vector<std::tuple<STP, int>>();
 
   for (auto &action : actions)
   {
@@ -286,9 +308,8 @@ std::vector<std::tuple<STP, int>> STP::getSuccessors(int tile)
     {
       STP n_stp = STP(_width, _height);
       int n_tile = std::get<int>(n_state.value());
-      int n_cost = getTile(n_tile) == -1 ? 0 : 1;
       n_stp.initState(std::get<torch::Tensor>(n_state.value()));
-      successors.push_back({n_stp, n_cost});
+      successors.push_back({n_stp, n_tile});
     }
   }
 
