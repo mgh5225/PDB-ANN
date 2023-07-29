@@ -41,6 +41,7 @@ void PDB::fill()
     pattern_with_zero.push_back(0);
 
   _table[_goal.hashState(_pattern)] = 0;
+  _states[_goal.hashState(pattern_with_zero, std::vector<int>({_goal.blank()}))] = true;
 
   while (!frontier.empty())
   {
@@ -62,7 +63,7 @@ void PDB::fill()
       if (_states[idx_s_with_zero])
         continue;
 
-      int cost = n_stp.getTile(n_tile) == -1 ? 0 : 1;
+      int cost = n_stp.getTile(tile) == -1 ? 0 : 1;
 
       int idx_s = n_stp.hashState(_pattern);
       int h_s = h_f + cost;
