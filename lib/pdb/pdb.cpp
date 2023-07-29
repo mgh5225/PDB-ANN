@@ -2,7 +2,7 @@
 
 PDB::PDB(STP goalSTP, std::vector<int> pattern)
 {
-  int pdbSize = 1;
+  int64_t pdbSize = 1;
   int n_factor = goalSTP.size() - pattern.size();
 
   for (int i = goalSTP.size(); i > n_factor; i--)
@@ -20,7 +20,7 @@ PDB::PDB(STP goalSTP, std::vector<int> pattern)
   _states = std::vector<bool>(pdbSize * n_factor, false);
 }
 
-int PDB::size()
+int64_t PDB::size()
 {
   return _table.size(0);
 }
@@ -58,14 +58,14 @@ void PDB::fill()
       STP n_stp = std::get<STP>(successor);
       int n_tile = std::get<int>(successor);
 
-      int idx_s_with_zero = n_stp.hashState(pattern_with_zero, std::vector<int>({n_tile}));
+      int64_t idx_s_with_zero = n_stp.hashState(pattern_with_zero, std::vector<int>({n_tile}));
 
       if (_states[idx_s_with_zero])
         continue;
 
       int cost = n_stp.getTile(tile) == -1 ? 0 : 1;
 
-      int idx_s = n_stp.hashState(_pattern);
+      int64_t idx_s = n_stp.hashState(_pattern);
       int h_s = h_f + cost;
 
       if (_table[idx_s].item<int>() == -1)

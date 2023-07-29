@@ -38,8 +38,8 @@ public:
   void toAbstract(std::vector<int> pattern);
   torch::Tensor getFlattenState(bool by_pos = false);
   torch::Tensor getFlattenState(std::vector<int> pattern);
-  int hashState(std::optional<torch::Tensor> pi_optional = std::nullopt);
-  int hashState(std::vector<int> pattern, std::optional<std::vector<int>> pi_helper = std::nullopt);
+  int64_t hashState(std::optional<torch::Tensor> pi_optional = std::nullopt);
+  int64_t hashState(std::vector<int> pattern, std::optional<std::vector<int>> pi_helper = std::nullopt);
   bool moveBlank(STPAction action);
   std::optional<std::tuple<torch::Tensor, int>> nextState(STPAction action, int tile);
   std::vector<STPAction> getActions(int tile);

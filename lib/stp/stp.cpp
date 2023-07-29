@@ -146,19 +146,19 @@ torch::Tensor STP::getFlattenState(std::vector<int> pattern)
   return res;
 }
 
-int STP::hashState(std::optional<torch::Tensor> pi_optional)
+int64_t STP::hashState(std::optional<torch::Tensor> pi_optional)
 {
   torch::Tensor pi = pi_optional.value_or(getFlattenState());
 
   int pi_size = pi.size(0);
 
-  int rank = 0;
+  int64_t rank = 0;
   int k = size();
 
   for (int i = 0; i < pi_size; i++)
   {
     int number = pi[i].item<int>();
-    int factorial = number;
+    int64_t factorial = number;
     for (int j = k - 1; j > size() - pi_size; j--)
     {
       factorial *= j;
@@ -176,7 +176,7 @@ int STP::hashState(std::optional<torch::Tensor> pi_optional)
   return rank;
 }
 
-int STP::hashState(std::vector<int> pattern, std::optional<std::vector<int>> pi_helper)
+int64_t STP::hashState(std::vector<int> pattern, std::optional<std::vector<int>> pi_helper)
 {
   torch::Tensor pi = getFlattenState(pattern);
 
