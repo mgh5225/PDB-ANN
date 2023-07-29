@@ -197,6 +197,7 @@ std::optional<std::tuple<torch::Tensor, int>> STP::nextState(STPAction action, i
 {
   int x_t = static_cast<int>(tile / _width);
   int y_t = tile % _width;
+  int v_t = getTile(tile);
 
   torch::Tensor n_state = 1 * getState();
 
@@ -206,7 +207,7 @@ std::optional<std::tuple<torch::Tensor, int>> STP::nextState(STPAction action, i
     if (x_t > 0)
     {
       int tmp = n_state[x_t - 1][y_t].item<int>();
-      n_state[x_t - 1][y_t] = 0;
+      n_state[x_t - 1][y_t] = v_t;
       n_state[x_t][y_t] = tmp;
       tile = (x_t - 1) * _width + y_t;
     }
@@ -217,7 +218,7 @@ std::optional<std::tuple<torch::Tensor, int>> STP::nextState(STPAction action, i
     if (y_t < _width - 1)
     {
       int tmp = n_state[x_t][y_t + 1].item<int>();
-      n_state[x_t][y_t + 1] = 0;
+      n_state[x_t][y_t + 1] = v_t;
       n_state[x_t][y_t] = tmp;
       tile = (x_t)*_width + (y_t + 1);
     }
@@ -228,7 +229,7 @@ std::optional<std::tuple<torch::Tensor, int>> STP::nextState(STPAction action, i
     if (x_t < _height - 1)
     {
       int tmp = n_state[x_t + 1][y_t].item<int>();
-      n_state[x_t + 1][y_t] = 0;
+      n_state[x_t + 1][y_t] = v_t;
       n_state[x_t][y_t] = tmp;
       tile = (x_t + 1) * _width + y_t;
     }
@@ -239,7 +240,7 @@ std::optional<std::tuple<torch::Tensor, int>> STP::nextState(STPAction action, i
     if (y_t > 0)
     {
       int tmp = n_state[x_t][y_t - 1].item<int>();
-      n_state[x_t][y_t - 1] = 0;
+      n_state[x_t][y_t - 1] = v_t;
       n_state[x_t][y_t] = tmp;
       tile = (x_t)*_width + (y_t - 1);
     }

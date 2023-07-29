@@ -21,6 +21,11 @@ int PDB::size()
   return _table.size(0);
 }
 
+torch::Tensor PDB::getTable()
+{
+  return _table;
+}
+
 void PDB::fill()
 {
   std::queue<STP> frontier = std::queue<STP>();

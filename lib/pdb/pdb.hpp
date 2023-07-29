@@ -19,6 +19,7 @@ private:
 public:
   PDB(STP goalSTP, std::vector<int> pattern);
   int size();
+  torch::Tensor getTable();
   void fill();
 };
 

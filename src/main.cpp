@@ -3,35 +3,20 @@
 #include <vector>
 
 #include "stp/stp.hpp"
+#include "pdb/pdb.hpp"
 
 int main()
 {
-  STP puzzle = STP(3, 3);
+  STP puzzle = STP(2, 2);
+  puzzle.initGoal();
 
-  std::vector<int> state = std::vector<int>({3, 0, 1, 2, 4, 6, 7, 8, 5});
-  std::vector<int> pattern = std::vector<int>({0, 1, 6, 5});
-  puzzle.initState(state);
-  puzzle.toAbstract(pattern);
+  std::vector<int> pattern = std::vector<int>({2, 3});
 
-  std::cout << puzzle.getState() << std::endl;
+  PDB pdb = PDB(puzzle, pattern);
 
-  puzzle.move(STPAction::RIGHT);
-  puzzle.move(STPAction::UP);
+  std::cout << pdb.size() << std::endl;
 
-  std::cout << puzzle.getState() << std::endl;
+  pdb.fill();
 
-  puzzle.move(STPAction::DOWN);
-  puzzle.move(STPAction::DOWN);
-
-  std::cout << puzzle.getState() << std::endl;
-
-  puzzle.move(STPAction::LEFT);
-  puzzle.move(STPAction::LEFT);
-
-  std::cout << puzzle.getState() << std::endl;
-
-  puzzle.move(STPAction::UP);
-  puzzle.move(STPAction::UP);
-
-  std::cout << puzzle.getState() << std::endl;
+  std::cout << pdb.getTable() << std::endl;
 }
