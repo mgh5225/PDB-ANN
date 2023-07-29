@@ -152,27 +152,25 @@ int STP::hashState(std::optional<torch::Tensor> pi_optional)
 
   int pi_size = pi.size(0);
 
-  int k = static_cast<int>(std::log2f(pi_size));
-
-  auto options = torch::TensorOptions().dtype(torch::kInt);
-  torch::Tensor pi_1 = torch::zeros({((1 << (1 + k)) - 1)}, options);
-
   int rank = 0;
+  int k = size();
 
   for (int i = 0; i < pi_size; i++)
   {
-    int counter = pi[i].item<int>();
-    int node = (1 << k) - 1 + counter;
-
-    for (int j = 0; j < k; j++)
+    int number = pi[i].item<int>();
+    int factorial = number;
+    for (int j = k - 1; j > size() - pi_size; j--)
     {
-      int isEven = (1 - (node & 1));
-      counter -= isEven * (pi_1[(node - 1) >> 1].item<int>() - pi_1[node].item<int>());
-      pi_1[node] += 1;
-      node = (node - 1) >> 1;
+      factorial *= j;
     }
-    pi_1[node] += 1;
-    rank = rank * (size() - i) + counter;
+    rank += factorial;
+    k--;
+
+    for (int j = i + 1; j < pi_size; j++)
+    {
+      if (pi[j].item<int>() > number)
+        pi[j] -= 1;
+    }
   }
 
   return rank;
