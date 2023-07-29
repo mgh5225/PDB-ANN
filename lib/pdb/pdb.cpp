@@ -1,5 +1,18 @@
 #include "pdb.hpp"
 
+PDB::PDB()
+{
+  int64_t pdbSize = 0;
+
+  auto options = torch::TensorOptions().dtype(torch::kInt);
+  _table = torch::full({0}, -1, options);
+
+  _goal = STP();
+  _pattern = std::vector<int>();
+
+  _states = std::vector<bool>(pdbSize, false);
+}
+
 PDB::PDB(STP goalSTP, std::vector<int> pattern)
 {
   int64_t pdbSize = 1;
@@ -28,6 +41,11 @@ int64_t PDB::size()
 torch::Tensor PDB::getTable()
 {
   return _table;
+}
+
+STP PDB::getSTP()
+{
+  return _goal;
 }
 
 void PDB::fill()

@@ -19,10 +19,14 @@ private:
   STP _goal;
 
 public:
+  PDB();
   PDB(STP goalSTP, std::vector<int> pattern);
   int64_t size();
   torch::Tensor getTable();
+  STP getSTP();
   void fill();
 };
+
+typedef std::vector<PDB> PDBs;
 
 #endif
