@@ -15,6 +15,7 @@ private:
 public:
   QNT_5_5();
   torch::Tensor forward(torch::Tensor x);
+  int getHeuristic(torch::Tensor v, float q);
 };
 
 #endif

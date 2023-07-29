@@ -17,3 +17,20 @@ torch::Tensor QNT_5_5::forward(torch::Tensor x)
 
   return x;
 }
+
+int QNT_5_5::getHeuristic(torch::Tensor v, float q)
+{
+  torch::Tensor p_hc = forward(v);
+  int c_h = 0;
+  int i = 0;
+
+  for (; i < p_hc.size(0); i++)
+  {
+    float p_hc_i = p_hc[i].item<float>();
+    c_h += p_hc_i;
+    if (c_h >= q)
+      break;
+  }
+
+  return i;
+}
