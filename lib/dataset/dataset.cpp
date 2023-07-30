@@ -84,23 +84,26 @@ void STPDataset::generateRandom(std::string path)
 
   auto dataset = std::vector<json>();
 
-  for (int64_t i = 0; i < size; i++)
+  for (int64_t i = -1; i < size; i++)
   {
     for (int j = 0; j < permutation_size; j++)
     {
       permutation[j] = j;
     }
 
-    int n = permutation_size;
-    int64_t r = i;
-    while (n > 0)
+    if (i >= 0)
     {
-      int k = r % n;
-      int tmp = permutation[n - 1];
-      permutation[n - 1] = permutation[k];
-      permutation[k] = tmp;
-      r = static_cast<int>(r / n);
-      n--;
+      int n = permutation_size;
+      int64_t r = i;
+      while (n > 0)
+      {
+        int k = r % n;
+        int tmp = permutation[n - 1];
+        permutation[n - 1] = permutation[k];
+        permutation[k] = tmp;
+        r = static_cast<int>(r / n);
+        n--;
+      }
     }
 
     auto heuristics = std::vector<json>();
