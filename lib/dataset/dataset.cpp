@@ -10,37 +10,15 @@ STPDataset::STPDataset(std::string path)
 
   _pdb_s = PDBs();
 
-  int64_t size = data["size"];
+  _size = data["size"];
+  _dataset = data["dataset"];
+  _permutation_size = data["permutation_size"];
+
   std::vector<json> j_pdb_s = data["pdb_s"];
 
   for (auto &j_pdb : j_pdb_s)
   {
     _pdb_s.push_back(PDB::fromJSON(j_pdb));
-  }
-}
-
-STPDataset::STPDataset(PDBs pdb_s)
-{
-  _pdb_s = pdb_s;
-
-  for (auto &pdb : _pdb_s)
-  {
-    pdb.fill();
-  }
-}
-
-STPDataset::STPDataset(STP goalSTP, std::vector<std::vector<int>> pattern_s)
-{
-  _pdb_s = PDBs();
-
-  for (auto &pattern : pattern_s)
-  {
-    _pdb_s.push_back(PDB(goalSTP, pattern));
-  }
-
-  for (auto &pdb : _pdb_s)
-  {
-    pdb.fill();
   }
 }
 
@@ -84,7 +62,7 @@ void STPDataset::generateRandom(std::string path)
 
   auto dataset = std::vector<json>();
 
-  for (int64_t i = -1; i < size; i++)
+  for (int64_t i = -1; i < size - 1; i++)
   {
     for (int j = 0; j < permutation_size; j++)
     {
@@ -146,7 +124,21 @@ void STPDataset::generateRandom(std::string path)
 
 json STPDataset::toJSON()
 {
-  return json();
+  json data;
+
+  auto j_pdb_s = std::vector<json>();
+
+  for (auto &pdb : _pdb_s)
+  {
+    j_pdb_s.push_back(pdb.toJSON());
+  }
+
+  data["pdb_s"] = j_pdb_s;
+  data["size"] = _size;
+  data["dataset"] = _dataset;
+  data["permutation_size"] = _permutation_size;
+
+  return data;
 }
 
 void STPDataset::save(std::string path)
@@ -163,4 +155,9 @@ void STPDataset::save(std::string path)
 torch::data::Example<> STPDataset::get(size_t index)
 {
   return torch::data::Example<>();
+}
+
+torch::optional<size_t> STPDataset::size() const
+{
+  return _size;
 }

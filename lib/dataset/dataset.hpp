@@ -16,15 +16,17 @@ class STPDataset : torch::data::Dataset<STPDataset>
 {
 private:
   PDBs _pdb_s;
+  std::vector<json> _dataset;
+  int64_t _size;
+  int _permutation_size;
 
 public:
-  STPDataset(std::string path);
-  STPDataset(PDBs pdb_s);
-  STPDataset(STP goalSTP, std::vector<std::vector<int>> pattern_s);
+  explicit STPDataset(std::string path);
   static void generateRandom(std::string path);
   json toJSON();
   void save(std::string path);
   torch::data::Example<> get(size_t index) override;
+  torch::optional<size_t> size() const override;
 };
 
 #endif
