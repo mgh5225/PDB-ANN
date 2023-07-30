@@ -31,9 +31,12 @@ public:
   torch::Tensor getTable();
   STP getSTP();
   void fill();
+  static PDB fromJSON(json data);
   static PDB load(std::string path);
   json toJSON();
   void save(std::string path);
+  std::tuple<int, int> getHeuristic(std::vector<int> state);
+  std::vector<int> getPattern();
 };
 
 typedef std::vector<PDB> PDBs;

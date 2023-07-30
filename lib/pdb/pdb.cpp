@@ -96,14 +96,8 @@ void PDB::fill()
   }
 }
 
-PDB PDB::load(std::string path)
+PDB PDB::fromJSON(json data)
 {
-  std::ifstream f(path);
-
-  json data = json::parse(f);
-
-  f.close();
-
   int64_t pdbSize = data["pdbSize"];
   std::vector<int> pattern = data["pattern"];
   std::vector<int> table = data["table"];
@@ -120,6 +114,17 @@ PDB PDB::load(std::string path)
   pdb._table = torch::from_blob(table.data(), {pdbSize}, options).clone();
 
   return pdb;
+}
+
+PDB PDB::load(std::string path)
+{
+  std::ifstream f(path);
+
+  json data = json::parse(f);
+
+  f.close();
+
+  return fromJSON(data);
 }
 
 json PDB::toJSON()
@@ -146,4 +151,20 @@ void PDB::save(std::string path)
   f << data;
 
   f.close();
+}
+
+std::tuple<int, int> PDB::getHeuristic(std::vector<int> state)
+{
+  auto stp = STP(_goal.dimension());
+  stp.initState(state);
+  stp.toAbstract(_pattern);
+
+  int h_md = stp.getMDHeuristic();
+
+  return std::tuple<int, int>({_table[stp.hashState(_pattern)].item<int>(), h_md});
+}
+
+std::vector<int> PDB::getPattern()
+{
+  return _pattern;
 }
