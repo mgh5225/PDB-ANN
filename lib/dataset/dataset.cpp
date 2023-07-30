@@ -127,6 +127,8 @@ void STPDataset::generateRandom(std::string path)
     dataset.push_back({
         {"permutation", permutation},
         {"heuristics", heuristics},
+        {"h", sum_h},
+        {"md", sum_md},
     });
   }
 
