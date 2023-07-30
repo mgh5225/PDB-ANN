@@ -138,6 +138,7 @@ json PDB::toJSON()
   data["table"] = std::vector<int>(_table.data_ptr<int>(), _table.data_ptr<int>() + size());
   data["goal"] = std::vector<int>(f_state.data_ptr<int>(), f_state.data_ptr<int>() + _goal.size());
   data["goal_dimension"] = _goal.dimension();
+  data["h_max"] = torch::max(_table).item<int>();
 
   return data;
 }

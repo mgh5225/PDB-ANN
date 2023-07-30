@@ -13,6 +13,8 @@ STPDataset::STPDataset(std::string path)
   _size = data["size"];
   _dataset = data["dataset"];
   _permutation_size = data["permutation_size"];
+  _dimension = data["dimension"];
+  _h_max = data["h_max"];
 
   std::vector<json> j_pdb_s = data["pdb_s"];
 
@@ -61,6 +63,8 @@ void STPDataset::generateRandom(std::string path)
   auto permutation = std::vector<int>(permutation_size);
 
   auto dataset = std::vector<json>();
+
+  int h_max = 0;
 
   for (int64_t i = -1; i < size - 1; i++)
   {
@@ -111,9 +115,13 @@ void STPDataset::generateRandom(std::string path)
         {"h", sum_h},
         {"md", sum_md},
     });
+
+    if (sum_h > h_max)
+      h_max = sum_h;
   }
 
   data["dataset"] = dataset;
+  data["h_max"] = h_max;
 
   std::ofstream f_out(path);
 
@@ -137,6 +145,8 @@ json STPDataset::toJSON()
   data["size"] = _size;
   data["dataset"] = _dataset;
   data["permutation_size"] = _permutation_size;
+  data["dimension"] = _dimension;
+  data["h_max"] = _h_max;
 
   return data;
 }
@@ -154,7 +164,23 @@ void STPDataset::save(std::string path)
 
 torch::data::Example<> STPDataset::get(size_t index)
 {
-  return torch::data::Example<>();
+
+  json data = _dataset[index];
+
+  std::vector<int> f_state = data["permutation"];
+
+  int h = data["h"];
+  int h_max = data["h_max"];
+
+  h /= 2;
+
+  auto stp = STP(_dimension);
+  stp.initState(f_state);
+
+  torch::Tensor label = torch::zeros({h_max});
+  label[h] = 1;
+
+  return torch::data::Example<>({stp.getState(), label});
 }
 
 torch::optional<size_t> STPDataset::size() const

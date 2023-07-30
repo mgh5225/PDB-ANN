@@ -7,6 +7,7 @@
 #include <iostream>
 #include <vector>
 #include <string>
+#include <tuple>
 #include <fstream>
 
 #include "stp/stp.hpp"
@@ -19,6 +20,8 @@ private:
   std::vector<json> _dataset;
   int64_t _size;
   int _permutation_size;
+  int _h_max;
+  std::tuple<int, int> _dimension;
 
 public:
   explicit STPDataset(std::string path);
