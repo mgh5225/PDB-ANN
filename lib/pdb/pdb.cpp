@@ -95,3 +95,55 @@ void PDB::fill()
     }
   }
 }
+
+PDB PDB::load(std::string path)
+{
+  std::ifstream f(path);
+
+  json data = json::parse(f);
+
+  f.close();
+
+  int64_t pdbSize = data["pdbSize"];
+  std::vector<int> pattern = data["pattern"];
+  std::vector<int> table = data["table"];
+
+  std::vector<int> goal = data["goal"];
+  std::tuple<int, int> goal_dimension = data["goal_dimension"];
+
+  auto goalSTP = STP(goal_dimension);
+  goalSTP.initState(goal);
+
+  auto pdb = PDB(goalSTP, pattern);
+
+  auto options = torch::TensorOptions().dtype(torch::kInt);
+  pdb._table = torch::from_blob(table.data(), {pdbSize}, options).clone();
+
+  return pdb;
+}
+
+json PDB::toJSON()
+{
+  json data;
+
+  torch::Tensor f_state = _goal.getFlattenState();
+
+  data["pdbSize"] = size();
+  data["pattern"] = _pattern;
+  data["table"] = std::vector<int>(_table.data_ptr<int>(), _table.data_ptr<int>() + size());
+  data["goal"] = std::vector<int>(f_state.data_ptr<int>(), f_state.data_ptr<int>() + _goal.size());
+  data["goal_dimension"] = _goal.dimension();
+
+  return data;
+}
+
+void PDB::save(std::string path)
+{
+  json data = toJSON();
+
+  std::ofstream f(path);
+
+  f << data;
+
+  f.close();
+}

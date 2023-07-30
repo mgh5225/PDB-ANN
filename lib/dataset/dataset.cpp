@@ -28,3 +28,8 @@ STPDataset::STPDataset(STP goalSTP, std::vector<std::vector<int>> pattern_s)
 void STPDataset::generateRandom(int size)
 {
 }
+
+torch::data::Example<> STPDataset::get(size_t index)
+{
+  return torch::data::Example<>();
+}

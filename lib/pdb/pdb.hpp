@@ -2,13 +2,19 @@
 #define PDB_ANN_PDB
 
 #include <torch/torch.h>
+#include <nlohmann/json.hpp>
 
 #include <iostream>
 #include <vector>
 #include <queue>
+#include <tuple>
 #include <algorithm>
+#include <string>
+#include <fstream>
 
 #include "stp/stp.hpp"
+
+using json = nlohmann::json;
 
 class PDB
 {
@@ -25,6 +31,9 @@ public:
   torch::Tensor getTable();
   STP getSTP();
   void fill();
+  static PDB load(std::string path);
+  json toJSON();
+  void save(std::string path);
 };
 
 typedef std::vector<PDB> PDBs;

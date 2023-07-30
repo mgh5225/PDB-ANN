@@ -22,6 +22,17 @@ STP::STP(int width, int height)
   _blank = 0;
 }
 
+STP::STP(std::tuple<int, int> dimension)
+{
+  _width = std::get<0>(dimension);
+  _height = std::get<1>(dimension);
+
+  auto options = torch::TensorOptions().dtype(torch::kInt);
+
+  _state = torch::zeros({_height, _width}, options);
+  _blank = 0;
+}
+
 STP::STP(const STP &_stp)
 {
   _width = _stp._width;
@@ -51,6 +62,11 @@ int STP::getTile(int tile)
   int y_t = tile % _width;
 
   return _state[x_t][y_t].item<int>();
+}
+
+std::tuple<int, int> STP::dimension()
+{
+  return std::tuple<int, int>({_width, _height});
 }
 
 void STP::initGoal()

@@ -17,6 +17,7 @@ public:
   STPDataset(PDBs pdb_s);
   STPDataset(STP goalSTP, std::vector<std::vector<int>> pattern_s);
   void generateRandom(int size);
+  torch::data::Example<> get(size_t index) override;
 };
 
 #endif

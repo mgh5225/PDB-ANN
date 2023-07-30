@@ -27,10 +27,12 @@ private:
 public:
   STP();
   STP(int width, int height);
+  STP(std::tuple<int, int> dimension);
   STP(const STP &_stp);
   int size();
   int blank();
   int getTile(int tile);
+  std::tuple<int, int> dimension();
   void initGoal();
   void initState(torch::Tensor state);
   void initState(std::vector<int> state);

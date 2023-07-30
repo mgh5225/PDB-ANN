@@ -14,9 +14,11 @@ int main()
 
   PDB pdb = PDB(puzzle, pattern);
 
-  std::cout << pdb.size() << std::endl;
-
   pdb.fill();
 
-  std::cout << pdb.getTable() << std::endl;
+  pdb.save("data/pdb.json");
+
+  PDB pdb2 = PDB::load("data/pdb.json");
+
+  std::cout << pdb2.getTable() << std::endl;
 }

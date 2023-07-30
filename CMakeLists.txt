@@ -11,6 +11,7 @@ include_directories(lib)
 file(GLOB_RECURSE LIBS "lib/*.cpp")
 add_executable(main src/main.cpp ${LIBS})
 target_link_libraries(main "${TORCH_LIBRARIES}")
+target_include_directories(main PRIVATE "~/Libs/json/single_include")
 set_property(TARGET main PROPERTY CXX_STANDARD 17)
 
 # The following code block is suggested to be used on Windows.
