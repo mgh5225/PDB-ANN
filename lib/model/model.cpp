@@ -48,7 +48,8 @@ void QNT::train(json params)
   unsigned int step_size = step_lr_params["step_size"];
 
   int64_t batch_size = params["batch_size"];
-  std::string dataset_path = params["dataset"];
+  json j_dataset = params["dataset"];
+  std::string dataset_path = j_dataset["path"];
   int64_t epochs = params["epochs"];
   double random_split = params["random_split"];
 
