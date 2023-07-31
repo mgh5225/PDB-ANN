@@ -1,6 +1,6 @@
 #include "dataset.hpp"
 
-STPDataset::STPDataset(std::string path)
+STPDataset::STPDataset(std::string path, double random_split)
 {
   std::ifstream f(path);
 
@@ -22,6 +22,15 @@ STPDataset::STPDataset(std::string path)
   {
     _pdb_s.push_back(PDB::fromJSON(j_pdb));
   }
+
+  int64_t split_point = static_cast<int64_t>(random_split * _size);
+
+  std::vector<int64_t> indices(_size);
+  std::iota(indices.begin(), indices.end(), 0);
+  std::random_shuffle(indices.begin(), indices.end());
+
+  _train_indicies = std::vector<int64_t>(indices.begin(), indices.begin() + split_point);
+  _test_indicies = std::vector<int64_t>(indices.begin() + split_point, indices.end());
 }
 
 void STPDataset::generateRandom(std::string path)
@@ -173,6 +182,7 @@ torch::data::Example<> STPDataset::get(size_t index)
   int h_max = data["h_max"];
 
   h /= 2;
+  h_max /= 2;
 
   auto stp = STP(_dimension);
   stp.initState(f_state);
@@ -183,7 +193,32 @@ torch::data::Example<> STPDataset::get(size_t index)
   return torch::data::Example<>({stp.getState(), label});
 }
 
-torch::optional<size_t> STPDataset::size() const
+std::tuple<STPDataset::STPSubset, STPDataset::STPSubset> STPDataset::splitDataset()
 {
-  return _size;
+  auto dataset = std::make_shared<STPDataset>(*this);
+  auto train_indicies = std::make_shared<std::vector<int64_t>>(_train_indicies);
+  auto test_indicies = std::make_shared<std::vector<int64_t>>(_test_indicies);
+
+  auto trainDataset = STPSubset(dataset, train_indicies);
+  auto testDataset = STPSubset(dataset, test_indicies);
+
+  return std::make_tuple(trainDataset, testDataset);
+}
+
+STPDataset::STPSubset::STPSubset(std::shared_ptr<STPDataset> dataset, std::shared_ptr<std::vector<int64_t>> indicies)
+{
+  _dataset = dataset;
+  _indicies = indicies;
+}
+
+torch::data::Example<> STPDataset::STPSubset::get(size_t index)
+{
+  int64_t idx = _indicies->at(index);
+
+  return _dataset->get(idx);
+}
+
+torch::optional<size_t> STPDataset::STPSubset::size() const
+{
+  return _indicies->size();
 }

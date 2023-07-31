@@ -2,9 +2,17 @@
 #define PDB_ANN_MODEL
 
 #include <torch/torch.h>
-#include <iostream>
+#include <nlohmann/json.hpp>
 
-class QNT_5_5 : torch::nn::Module
+#include <iostream>
+#include <tuple>
+#include <string>
+
+#include "dataset/dataset.hpp"
+
+using json = nlohmann::json;
+
+class QNT : torch::nn::Module
 {
 private:
   std::shared_ptr<torch::nn::Conv2dImpl> conv;
@@ -13,9 +21,10 @@ private:
   std::shared_ptr<torch::nn::LinearImpl> fc3;
 
 public:
-  QNT_5_5();
+  QNT();
   torch::Tensor forward(torch::Tensor x);
   int getHeuristic(torch::Tensor v, float q);
+  void train(json params);
 };
 
 #endif

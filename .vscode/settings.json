@@ -79,6 +79,8 @@
     "ranges": "cpp"
   },
   "cSpell.words": [
-    "dtype"
-  ]
+    "dtype",
+    "optim",
+    "softmax"
+  ],
 }

@@ -66,7 +66,7 @@ int STP::getTile(int tile)
 
 std::tuple<int, int> STP::dimension()
 {
-  return std::tuple<int, int>({_width, _height});
+  return std::make_tuple(_width, _height);
 }
 
 void STP::initGoal()
@@ -288,7 +288,7 @@ std::optional<std::tuple<torch::Tensor, int>> STP::nextState(STPAction action, i
     return std::nullopt;
   }
 
-  return std::tuple<torch::Tensor, int>({n_state, tile});
+  return std::make_tuple(n_state, tile);
 }
 
 std::vector<STPAction> STP::getActions(int tile)

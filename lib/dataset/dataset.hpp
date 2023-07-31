@@ -5,15 +5,19 @@
 #include <nlohmann/json.hpp>
 
 #include <iostream>
+#include <algorithm>
 #include <vector>
 #include <string>
 #include <tuple>
+#include <memory>
 #include <fstream>
 
 #include "stp/stp.hpp"
 #include "pdb/pdb.hpp"
 
-class STPDataset : torch::data::Dataset<STPDataset>
+using json = nlohmann::json;
+
+class STPDataset
 {
 private:
   PDBs _pdb_s;
@@ -22,14 +26,28 @@ private:
   int _permutation_size;
   int _h_max;
   std::tuple<int, int> _dimension;
+  std::vector<int64_t> _train_indicies;
+  std::vector<int64_t> _test_indicies;
 
 public:
-  explicit STPDataset(std::string path);
+  STPDataset(std::string path, double random_split);
   static void generateRandom(std::string path);
   json toJSON();
   void save(std::string path);
-  torch::data::Example<> get(size_t index) override;
-  torch::optional<size_t> size() const override;
-};
+  torch::data::Example<> get(size_t index);
 
+  class STPSubset : public torch::data::Dataset<STPSubset>
+  {
+  private:
+    std::shared_ptr<STPDataset> _dataset;
+    std::shared_ptr<std::vector<int64_t>> _indicies;
+
+  public:
+    explicit STPSubset(std::shared_ptr<STPDataset> dataset, std::shared_ptr<std::vector<int64_t>> indicies);
+    torch::data::Example<> get(size_t index) override;
+    torch::optional<size_t> size() const override;
+  };
+
+  std::tuple<STPDataset::STPSubset, STPDataset::STPSubset> splitDataset();
+};
 #endif

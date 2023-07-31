@@ -1,0 +1,16 @@
+{
+  "adam": {
+    "alpha": 0.001,
+    "beta": [0.9, 0.999],
+    "epsilon": 10e-8
+  },
+  "step_lr": {
+    "gamma": 0.95,
+    "step_size": 20
+  },
+  "batch_size": 10,
+  "dataset": "data/dataset.json",
+  "epochs": 100,
+  "q_star": 1.63e-18,
+  "random_split": 0.7
+}

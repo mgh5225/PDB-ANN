@@ -162,7 +162,7 @@ std::tuple<int, int> PDB::getHeuristic(std::vector<int> state)
 
   int h_md = stp.getMDHeuristic();
 
-  return std::tuple<int, int>({_table[stp.hashState(_pattern)].item<int>(), h_md});
+  return std::make_tuple(_table[stp.hashState(_pattern)].item<int>(), h_md);
 }
 
 std::vector<int> PDB::getPattern()
