@@ -23,7 +23,6 @@ private:
   PDBs _pdb_s;
   std::vector<json> _dataset;
   int64_t _size;
-  int _permutation_size;
   int _h_max;
   std::tuple<int, int> _dimension;
   std::vector<int64_t> _train_indicies;
@@ -31,7 +30,7 @@ private:
 
 public:
   STPDataset(std::string path, double random_split);
-  static void generateRandom(std::string path);
+  static void generateRandom(json params);
   json toJSON();
   void save(std::string path);
   torch::data::Example<> get(size_t index);

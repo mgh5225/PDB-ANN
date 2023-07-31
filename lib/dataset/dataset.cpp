@@ -12,7 +12,6 @@ STPDataset::STPDataset(std::string path, double random_split)
 
   _size = data["size"];
   _dataset = data["dataset"];
-  _permutation_size = data["permutation_size"];
   _dimension = data["dimension"];
   _h_max = data["h_max"];
 
@@ -33,41 +32,36 @@ STPDataset::STPDataset(std::string path, double random_split)
   _test_indicies = std::vector<int64_t>(indices.begin() + split_point, indices.end());
 }
 
-void STPDataset::generateRandom(std::string path)
+void STPDataset::generateRandom(json params)
 {
-  std::ifstream f(path);
+  json data;
 
-  json data = json::parse(f);
+  json settings = params["dataset"];
 
-  f.close();
+  std::tuple<int, int> dimension = settings["dimension"];
+  std::vector<std::vector<int>> patterns = settings["patterns"];
+  std::string path = settings["path"];
+  int64_t size = settings["size"];
 
+  int permutation_size = std::get<0>(dimension) * std::get<1>(dimension);
   auto pdb_s = PDBs();
 
-  int64_t size = data["size"];
-  int permutation_size = data["permutation_size"];
-  std::vector<json> j_pdb_s = data["pdb_s"];
-
-  for (auto &j_pdb : j_pdb_s)
+  for (auto &pattern : patterns)
   {
-    std::vector<int> pattern = j_pdb["pattern"];
-    std::tuple<int, int> goal_dimension = j_pdb["goal_dimension"];
-
-    auto goalSTP = STP(goal_dimension);
+    auto goalSTP = STP(dimension);
     goalSTP.initGoal();
 
     auto pdb = PDB(goalSTP, pattern);
     pdb_s.push_back(pdb);
   }
 
-  j_pdb_s.resize(0);
+  auto j_pdb_s = std::vector<json>();
 
   for (auto &pdb : pdb_s)
   {
     pdb.fill();
     j_pdb_s.push_back(pdb.toJSON());
   }
-
-  data["pdb_s"] = j_pdb_s;
 
   auto permutation = std::vector<int>(permutation_size);
 
@@ -77,10 +71,7 @@ void STPDataset::generateRandom(std::string path)
 
   for (int64_t i = -1; i < size - 1; i++)
   {
-    for (int j = 0; j < permutation_size; j++)
-    {
-      permutation[j] = j;
-    }
+    std::iota(permutation.begin(), permutation.end(), 0);
 
     if (i >= 0)
     {
@@ -130,7 +121,10 @@ void STPDataset::generateRandom(std::string path)
   }
 
   data["dataset"] = dataset;
+  data["dimension"] = dimension;
   data["h_max"] = h_max;
+  data["pdb_s"] = j_pdb_s;
+  data["size"] = size;
 
   std::ofstream f_out(path);
 
@@ -153,7 +147,6 @@ json STPDataset::toJSON()
   data["pdb_s"] = j_pdb_s;
   data["size"] = _size;
   data["dataset"] = _dataset;
-  data["permutation_size"] = _permutation_size;
   data["dimension"] = _dimension;
   data["h_max"] = _h_max;
 
