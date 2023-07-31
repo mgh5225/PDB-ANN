@@ -5,7 +5,7 @@ QNT::QNT()
   conv = register_module("conv", torch::nn::Conv2d(4, 32, 3));
   fc1 = register_module("fc1", torch::nn::Linear(32, 128));
   fc2 = register_module("fc2", torch::nn::Linear(128, 256));
-  fc3 = register_module("fc3", torch::nn::Linear(256, 6));
+  fc3 = register_module("fc3", torch::nn::Linear(256, 5));
 }
 
 torch::Tensor QNT::forward(torch::Tensor x)
