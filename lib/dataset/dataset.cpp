@@ -188,7 +188,9 @@ torch::data::Example<> STPDataset::get(size_t index, int heuristic_idx)
 
   torch::Tensor dual = stp.getFlattenState(pattern);
 
-  torch::Tensor data = torch::full({(int)pattern.size(), height, width}, -1);
+  auto options = torch::TensorOptions().dtype(torch::kFloat);
+
+  torch::Tensor data = torch::full({(int)pattern.size(), height, width}, -1, options);
 
   for (int i = 0; i < pattern.size(); i++)
   {
@@ -199,7 +201,7 @@ torch::data::Example<> STPDataset::get(size_t index, int heuristic_idx)
     data[i][x_t][y_t] = pattern[i];
   }
 
-  torch::Tensor target = torch::zeros({h_max});
+  torch::Tensor target = torch::zeros({h_max}, options);
   target[h] = 1;
 
   return torch::data::Example<>({data, target});
