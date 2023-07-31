@@ -12,7 +12,6 @@ torch::Tensor QNT::forward(torch::Tensor x)
 {
   x = torch::relu(conv->forward(x));
   x = torch::flatten(x, 1);
-  x = x.unsqueeze(1);
   x = torch::relu(fc1->forward(x));
   x = torch::relu(fc2->forward(x));
   x = torch::softmax(fc3->forward(x), 1);

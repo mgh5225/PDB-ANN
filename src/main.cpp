@@ -14,8 +14,8 @@ void trainQNT();
 
 int main()
 {
-  createDataset();
-  // trainQNT();
+  // createDataset();
+  trainQNT();
 }
 
 void createDataset()
