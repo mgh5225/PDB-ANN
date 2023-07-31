@@ -92,7 +92,7 @@ void QNT::train(json params)
     {
       torch::NoGradGuard no_grad;
 
-      for (auto &batch : *train_data_loader)
+      for (auto &batch : *test_data_loader)
       {
         torch::Tensor data = batch.data;
         torch::Tensor target = batch.target;
@@ -107,4 +107,17 @@ void QNT::train(json params)
 
     stepLR.step();
   }
+}
+
+void QNT::saveQNT()
+{
+  auto qnt = std::make_shared<QNT>(*this);
+  torch::save(qnt, "data/qnt.pt");
+}
+
+std::shared_ptr<QNT> QNT::loadQNT()
+{
+  auto qnt = std::make_shared<QNT>();
+  torch::load(qnt, "data/qnt.pt");
+  return qnt;
 }

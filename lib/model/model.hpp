@@ -5,6 +5,7 @@
 #include <nlohmann/json.hpp>
 
 #include <iostream>
+#include <memory>
 #include <tuple>
 #include <string>
 
@@ -12,7 +13,7 @@
 
 using json = nlohmann::json;
 
-class QNT : torch::nn::Module
+class QNT : public torch::nn::Module
 {
 private:
   std::shared_ptr<torch::nn::Conv2dImpl> conv;
@@ -25,6 +26,8 @@ public:
   torch::Tensor forward(torch::Tensor x);
   int getHeuristic(torch::Tensor v, float q);
   void train(json params);
+  void saveQNT();
+  static std::shared_ptr<QNT> loadQNT();
 };
 
 #endif

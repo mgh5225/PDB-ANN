@@ -1,6 +1,8 @@
 #include <torch/torch.h>
 #include <iostream>
 #include <vector>
+#include <memory>
+#include <fstream>
 
 #include "stp/stp.hpp"
 #include "pdb/pdb.hpp"
@@ -11,11 +13,13 @@ using json = nlohmann::json;
 
 void createDataset();
 void trainQNT();
+std::shared_ptr<QNT> loadQNT();
 
 int main()
 {
   // createDataset();
-  trainQNT();
+  // trainQNT();
+  auto qnt = loadQNT();
 }
 
 void createDataset()
@@ -39,4 +43,11 @@ void trainQNT()
 
   auto qnt = QNT();
   qnt.train(params);
+
+  qnt.saveQNT();
+}
+
+std::shared_ptr<QNT> loadQNT()
+{
+  return QNT::loadQNT();
 }
