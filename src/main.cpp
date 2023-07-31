@@ -3,6 +3,7 @@
 #include <vector>
 #include <memory>
 #include <fstream>
+#include <getopt.h>
 
 #include "stp/stp.hpp"
 #include "pdb/pdb.hpp"
@@ -13,13 +14,45 @@ using json = nlohmann::json;
 
 void createDataset();
 void trainQNT();
+void run();
 std::shared_ptr<QNT> loadQNT();
 
-int main()
+int main(int argc, char *argv[])
 {
-  // createDataset();
-  // trainQNT();
-  auto qnt = loadQNT();
+  option opts[] = {
+      {"create", optional_argument, nullptr, 'c'},
+      {"train", optional_argument, nullptr, 't'},
+      {"run", optional_argument, nullptr, 'r'},
+      {0},
+  };
+
+  const int opt = getopt_long(argc, argv, "ctr::", opts, 0);
+
+  while (1)
+  {
+    if (opt == -1)
+      break;
+
+    switch (opt)
+    {
+    case 'c':
+      createDataset();
+      break;
+
+    case 't':
+      trainQNT();
+      break;
+
+    case 'r':
+      run();
+      break;
+
+    default:
+      break;
+    }
+  }
+
+  return 0;
 }
 
 void createDataset()
@@ -50,4 +83,9 @@ void trainQNT()
 std::shared_ptr<QNT> loadQNT()
 {
   return QNT::loadQNT();
+}
+
+void run()
+{
+  auto qnt = loadQNT();
 }
