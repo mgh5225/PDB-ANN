@@ -37,6 +37,7 @@ public:
   void save(std::string path);
   std::tuple<int, int> getHeuristic(std::vector<int> state);
   std::vector<int> getPattern();
+  int h_max();
 };
 
 typedef std::vector<PDB> PDBs;

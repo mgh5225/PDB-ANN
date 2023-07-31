@@ -125,11 +125,11 @@ void STP::toAbstract(std::vector<int> pattern)
   initState(state);
 }
 
-torch::Tensor STP::getFlattenState(bool by_pos)
+torch::Tensor STP::getFlattenState(bool dual)
 {
   torch::Tensor f_state = _state.flatten();
 
-  if (by_pos)
+  if (dual)
   {
     auto options = torch::TensorOptions().dtype(torch::kInt);
     torch::Tensor pos = torch::full({size()}, -1, options);

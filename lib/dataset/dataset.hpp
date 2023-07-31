@@ -33,7 +33,7 @@ public:
   static void generateRandom(json params);
   json toJSON();
   void save(std::string path);
-  torch::data::Example<> get(size_t index);
+  torch::data::Example<> get(size_t index, int heuristic_idx = 0);
 
   class STPSubset : public torch::data::Dataset<STPSubset>
   {

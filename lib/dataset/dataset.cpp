@@ -164,26 +164,45 @@ void STPDataset::save(std::string path)
   f.close();
 }
 
-torch::data::Example<> STPDataset::get(size_t index)
+torch::data::Example<> STPDataset::get(size_t index, int heuristic_idx)
 {
 
-  json data = _dataset[index];
+  json row = _dataset[index];
 
-  std::vector<int> f_state = data["permutation"];
+  std::vector<int> f_state = row["permutation"];
+  std::vector<json> heuristics = row["heuristics"];
 
-  int h = data["h"];
-  int h_max = data["h_max"];
+  std::vector<int> pattern = heuristics[heuristic_idx]["pattern"];
+  int h = heuristics[heuristic_idx]["h"];
+  int h_max = _pdb_s[heuristic_idx].h_max();
 
   h /= 2;
   h_max /= 2;
 
   auto stp = STP(_dimension);
   stp.initState(f_state);
+  stp.toAbstract(pattern);
 
-  torch::Tensor label = torch::zeros({h_max});
-  label[h] = 1;
+  int width = std::get<0>(_dimension);
+  int height = std::get<1>(_dimension);
 
-  return torch::data::Example<>({stp.getState(), label});
+  torch::Tensor dual = stp.getFlattenState(pattern);
+
+  torch::Tensor data = torch::full({(int)pattern.size(), height, width}, -1);
+
+  for (int i = 0; i < pattern.size(); i++)
+  {
+    int tile = dual[i].item<int>();
+    int x_t = static_cast<int>(tile / width);
+    int y_t = tile % width;
+
+    data[i][x_t][y_t] = pattern[i];
+  }
+
+  torch::Tensor target = torch::zeros({h_max});
+  target[h] = 1;
+
+  return torch::data::Example<>({data, target});
 }
 
 std::tuple<STPDataset::STPSubset, STPDataset::STPSubset> STPDataset::splitDataset()

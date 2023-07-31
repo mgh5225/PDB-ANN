@@ -169,3 +169,8 @@ std::vector<int> PDB::getPattern()
 {
   return _pattern;
 }
+
+int PDB::h_max()
+{
+  return torch::max(_table).item<int>();
+}

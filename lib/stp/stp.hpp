@@ -38,7 +38,7 @@ public:
   void initState(std::vector<int> state);
   torch::Tensor getState();
   void toAbstract(std::vector<int> pattern);
-  torch::Tensor getFlattenState(bool by_pos = false);
+  torch::Tensor getFlattenState(bool dual = false);
   torch::Tensor getFlattenState(std::vector<int> pattern);
   int64_t hashState(std::optional<torch::Tensor> pi_optional = std::nullopt);
   int64_t hashState(std::vector<int> pattern, std::optional<std::vector<int>> pi_helper = std::nullopt);
