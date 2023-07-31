@@ -38,14 +38,14 @@ int QNT::getHeuristic(torch::Tensor v, float q)
 void QNT::train(json params)
 {
   json adam_params = params["adam"];
-  json step_rl_params = params["step_lr"];
+  json step_lr_params = params["step_lr"];
 
   double alpha = adam_params["alpha"];
   std::tuple<double, double> betas = adam_params["beta"];
   double epsilon = adam_params["epsilon"];
 
-  double gamma = step_rl_params["gamma"];
-  unsigned int step_size = step_rl_params["step_size"];
+  double gamma = step_lr_params["gamma"];
+  unsigned int step_size = step_lr_params["step_size"];
 
   int64_t batch_size = params["batch_size"];
   std::string dataset_path = params["dataset"];
