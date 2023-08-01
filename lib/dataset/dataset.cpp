@@ -97,26 +97,36 @@ void STPDataset::generateRandom(json params)
   }
 
   auto permutation = std::vector<int>(permutation_size);
+  auto goal_permutation = std::vector<int>(permutation_size);
+
+  std::iota(goal_permutation.begin(), goal_permutation.end(), 0);
+
+  int64_t state_space = 1;
+
+  for (int i = permutation_size; i > 1; i--)
+  {
+    state_space *= i;
+  }
 
   auto dataset = std::vector<json>();
 
-  for (int64_t i = -1; i < size - 1; i++)
-  {
-    std::iota(permutation.begin(), permutation.end(), 0);
+  std::srand(std::time(nullptr));
+  int64_t i = std::rand() % state_space;
 
-    if (i >= 0)
+  for (int64_t j = 0; j < size; j++)
+  {
+    permutation = goal_permutation;
+
+    int n = permutation_size;
+    int64_t r = i;
+    while (n > 0)
     {
-      int n = permutation_size;
-      int64_t r = i;
-      while (n > 0)
-      {
-        int k = r % n;
-        int tmp = permutation[n - 1];
-        permutation[n - 1] = permutation[k];
-        permutation[k] = tmp;
-        r = static_cast<int>(r / n);
-        n--;
-      }
+      int k = r % n;
+      int tmp = permutation[n - 1];
+      permutation[n - 1] = permutation[k];
+      permutation[k] = tmp;
+      r = static_cast<int>(r / n);
+      n--;
     }
 
     auto heuristics = std::vector<json>();
@@ -146,6 +156,9 @@ void STPDataset::generateRandom(json params)
         {"h", sum_h},
         {"md", sum_md},
     });
+
+    i++;
+    i %= state_space;
   }
 
   data["dataset"] = dataset;
