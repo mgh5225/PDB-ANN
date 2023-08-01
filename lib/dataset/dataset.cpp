@@ -125,7 +125,7 @@ void STPDataset::generateRandom(json params)
       int tmp = permutation[n - 1];
       permutation[n - 1] = permutation[k];
       permutation[k] = tmp;
-      r = static_cast<int>(r / n);
+      r = static_cast<int64_t>(r / n);
       n--;
     }
 
