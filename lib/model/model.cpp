@@ -5,7 +5,7 @@ QNT::QNT()
   conv = register_module("conv", torch::nn::Conv2d(4, 32, 3));
   fc1 = register_module("fc1", torch::nn::Linear(32, 128));
   fc2 = register_module("fc2", torch::nn::Linear(128, 256));
-  fc3 = register_module("fc3", torch::nn::Linear(256, 5));
+  fc3 = register_module("fc3", torch::nn::Linear(256, 6));
 }
 
 torch::Tensor QNT::forward(torch::Tensor x)
@@ -72,6 +72,10 @@ void QNT::train(json params)
   auto train_data_loader = torch::data::make_data_loader(std::move(train_dataset), dataLoaderOptions);
   auto test_data_loader = torch::data::make_data_loader(std::move(test_dataset), dataLoaderOptions);
 
+  std::cout << "Epoch"
+            << "\t"
+            << "Mean Loss" << std::endl;
+
   for (int64_t epoch = 0; epoch < epochs; epoch++)
   {
     for (auto &batch : *train_data_loader)
@@ -92,6 +96,8 @@ void QNT::train(json params)
     {
       torch::NoGradGuard no_grad;
 
+      torch::Tensor sum_loss = torch::zeros({1});
+
       for (auto &batch : *test_data_loader)
       {
         torch::Tensor data = batch.data;
@@ -101,8 +107,10 @@ void QNT::train(json params)
 
         torch::Tensor loss = cross_entropy->forward(classes, target);
 
-        std::cout << torch::mean(loss) << std::endl;
+        sum_loss += loss;
       }
+
+      std::cout << std::fixed << std::setfill('0') << std::setw(5) << epoch << "\t" << std::setw(10) << torch::mean(sum_loss).item<double>() << std::endl;
     }
 
     stepLR.step();

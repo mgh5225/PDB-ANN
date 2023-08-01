@@ -8,6 +8,7 @@
 #include <memory>
 #include <tuple>
 #include <string>
+#include <iomanip>
 
 #include "dataset/dataset.hpp"
 

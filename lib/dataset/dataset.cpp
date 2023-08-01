@@ -236,7 +236,7 @@ torch::data::Example<> STPDataset::get(size_t index, int heuristic_idx)
 
   auto options = torch::TensorOptions().dtype(torch::kFloat);
 
-  torch::Tensor data = torch::full({(int)pattern.size(), height, width}, -1, options);
+  torch::Tensor data = torch::zeros({(int)pattern.size(), height, width}, options);
 
   for (int i = 0; i < pattern.size(); i++)
   {
@@ -244,10 +244,10 @@ torch::data::Example<> STPDataset::get(size_t index, int heuristic_idx)
     int x_t = static_cast<int>(tile / width);
     int y_t = tile % width;
 
-    data[i][x_t][y_t] = pattern[i];
+    data[i][x_t][y_t] = 1;
   }
 
-  torch::Tensor target = torch::zeros({h_max}, options);
+  torch::Tensor target = torch::zeros({h_max + 1}, options);
   target[h] = 1;
 
   return torch::data::Example<>({data, target});
