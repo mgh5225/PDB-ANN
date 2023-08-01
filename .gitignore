@@ -61,3 +61,5 @@ _deps
 
 ### Others ###
 build/*
+data/*
+!data/hyper_params.json
