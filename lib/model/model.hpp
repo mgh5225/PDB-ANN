@@ -21,6 +21,7 @@ private:
   std::shared_ptr<torch::nn::LinearImpl> fc1;
   std::shared_ptr<torch::nn::LinearImpl> fc2;
   std::shared_ptr<torch::nn::LinearImpl> fc3;
+  std::shared_ptr<torch::nn::LinearImpl> fc4;
 
 public:
   QNT();

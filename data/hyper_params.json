@@ -1,6 +1,6 @@
 {
   "adam": {
-    "alpha": 0.01,
+    "alpha": 0.001,
     "beta": [0.9, 0.999],
     "epsilon": 10e-8
   },
@@ -8,7 +8,7 @@
     "gamma": 0.95,
     "step_size": 20
   },
-  "batch_size": 100,
+  "batch_size": 128,
   "dataset": {
     "dimension": [3, 3],
     "patterns": [
@@ -17,9 +17,9 @@
     ],
     "path": "data/dataset.json",
     "pdb_s": "data/pdb_s.json",
-    "size": 5000
+    "size": 1024
   },
-  "epochs": 1000,
+  "epochs": 100,
   "q_star": 1.63e-18,
   "random_split": 0.7
 }

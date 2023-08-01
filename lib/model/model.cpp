@@ -2,10 +2,11 @@
 
 QNT::QNT()
 {
-  conv = register_module("conv", torch::nn::Conv2d(4, 32, 3));
-  fc1 = register_module("fc1", torch::nn::Linear(32, 128));
-  fc2 = register_module("fc2", torch::nn::Linear(128, 256));
-  fc3 = register_module("fc3", torch::nn::Linear(256, 6));
+  conv = register_module("conv", torch::nn::Conv2d(4, 32, 2));
+  fc1 = register_module("fc1", torch::nn::Linear(128, 256));
+  fc2 = register_module("fc2", torch::nn::Linear(256, 512));
+  fc3 = register_module("fc3", torch::nn::Linear(512, 164));
+  fc4 = register_module("fc4", torch::nn::Linear(164, 6));
 }
 
 torch::Tensor QNT::forward(torch::Tensor x)
@@ -14,7 +15,8 @@ torch::Tensor QNT::forward(torch::Tensor x)
   x = torch::flatten(x, 1);
   x = torch::relu(fc1->forward(x));
   x = torch::relu(fc2->forward(x));
-  x = torch::softmax(fc3->forward(x), 1);
+  x = torch::relu(fc3->forward(x));
+  x = torch::softmax(fc4->forward(x), 1);
 
   return x;
 }
