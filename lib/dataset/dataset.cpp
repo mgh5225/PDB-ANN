@@ -15,7 +15,11 @@ STPDataset::STPDataset(std::string path, double random_split)
   _dimension = data["dimension"];
   _h_max = data["h_max"];
 
-  std::vector<json> j_pdb_s = data["pdb_s"];
+  std::string pdb_s_path = data["pdb_s"];
+
+  std::ifstream f_pdb_s(pdb_s_path);
+  std::vector<json> j_pdb_s = json::parse(f_pdb_s);
+  f_pdb_s.close();
 
   for (auto &j_pdb : j_pdb_s)
   {
@@ -32,18 +36,14 @@ STPDataset::STPDataset(std::string path, double random_split)
   _test_indicies = std::vector<int64_t>(indices.begin() + split_point, indices.end());
 }
 
-void STPDataset::generateRandom(json params)
+void STPDataset::generatePDBs(json params)
 {
-  json data;
-
   json settings = params["dataset"];
 
   std::tuple<int, int> dimension = settings["dimension"];
   std::vector<std::vector<int>> patterns = settings["patterns"];
-  std::string path = settings["path"];
-  int64_t size = settings["size"];
+  std::string pdb_s_path = settings["pdb_s"];
 
-  int permutation_size = std::get<0>(dimension) * std::get<1>(dimension);
   auto pdb_s = PDBs();
 
   for (auto &pattern : patterns)
@@ -63,11 +63,42 @@ void STPDataset::generateRandom(json params)
     j_pdb_s.push_back(pdb.toJSON());
   }
 
+  std::ofstream f_pdb_s(pdb_s_path);
+  f_pdb_s << json(j_pdb_s);
+  f_pdb_s.close();
+}
+
+void STPDataset::generateRandom(json params)
+{
+  json data;
+
+  json settings = params["dataset"];
+
+  std::tuple<int, int> dimension = settings["dimension"];
+  std::string path = settings["path"];
+  std::string pdb_s_path = settings["pdb_s"];
+  int64_t size = settings["size"];
+
+  int permutation_size = std::get<0>(dimension) * std::get<1>(dimension);
+  auto pdb_s = PDBs();
+
+  std::ifstream f_pdb_s(pdb_s_path);
+  std::vector<json> j_pdb_s = json::parse(f_pdb_s);
+  f_pdb_s.close();
+
+  int h_max = 0;
+
+  for (auto &j_pdb : j_pdb_s)
+  {
+    auto pdb = PDB::fromJSON(j_pdb);
+    if (pdb.h_max() > h_max)
+      h_max = pdb.h_max();
+    pdb_s.push_back(pdb);
+  }
+
   auto permutation = std::vector<int>(permutation_size);
 
   auto dataset = std::vector<json>();
-
-  int h_max = 0;
 
   for (int64_t i = -1; i < size - 1; i++)
   {
@@ -115,21 +146,16 @@ void STPDataset::generateRandom(json params)
         {"h", sum_h},
         {"md", sum_md},
     });
-
-    if (sum_h > h_max)
-      h_max = sum_h;
   }
 
   data["dataset"] = dataset;
   data["dimension"] = dimension;
   data["h_max"] = h_max;
-  data["pdb_s"] = j_pdb_s;
+  data["pdb_s"] = pdb_s_path;
   data["size"] = size;
 
   std::ofstream f_out(path);
-
   f_out << data;
-
   f_out.close();
 }
 
@@ -153,15 +179,22 @@ json STPDataset::toJSON()
   return data;
 }
 
-void STPDataset::save(std::string path)
+void STPDataset::save(std::string path, std::string pdb_s_path)
 {
   json data = toJSON();
 
+  std::vector<json> j_pdb_s = data["pdb_s"];
+
+  data["pdb_s"] = pdb_s_path;
+
   std::ofstream f(path);
+  std::ofstream f_pdb_s(pdb_s_path);
 
   f << data;
+  f_pdb_s << json(j_pdb_s);
 
   f.close();
+  f_pdb_s.close();
 }
 
 torch::data::Example<> STPDataset::get(size_t index, int heuristic_idx)

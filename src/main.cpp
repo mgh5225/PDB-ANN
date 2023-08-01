@@ -12,6 +12,7 @@
 
 using json = nlohmann::json;
 
+void createPDBs();
 void createDataset();
 void trainQNT();
 void run();
@@ -20,21 +21,25 @@ std::shared_ptr<QNT> loadQNT();
 int main(int argc, char *argv[])
 {
   option opts[] = {
+      {"pdb", optional_argument, nullptr, 'p'},
       {"create", optional_argument, nullptr, 'c'},
       {"train", optional_argument, nullptr, 't'},
       {"run", optional_argument, nullptr, 'r'},
       {0},
   };
 
-  const int opt = getopt_long(argc, argv, "ctr::", opts, 0);
-
   while (1)
   {
+    const int opt = getopt_long(argc, argv, "pctr::", opts, 0);
+
     if (opt == -1)
       break;
 
     switch (opt)
     {
+    case 'p':
+      createPDBs();
+      break;
     case 'c':
       createDataset();
       break;
@@ -53,6 +58,17 @@ int main(int argc, char *argv[])
   }
 
   return 0;
+}
+
+void createPDBs()
+{
+  std::ifstream f("data/hyper_params.json");
+
+  json params = json::parse(f);
+
+  f.close();
+
+  STPDataset::generatePDBs(params);
 }
 
 void createDataset()

@@ -30,9 +30,10 @@ private:
 
 public:
   STPDataset(std::string path, double random_split);
+  static void generatePDBs(json params);
   static void generateRandom(json params);
   json toJSON();
-  void save(std::string path);
+  void save(std::string path, std::string pdb_s_path);
   torch::data::Example<> get(size_t index, int heuristic_idx = 0);
 
   class STPSubset : public torch::data::Dataset<STPSubset>
