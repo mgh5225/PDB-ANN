@@ -23,13 +23,15 @@ torch::Tensor QNT::forward(torch::Tensor x)
 
 int QNT::getHeuristic(torch::Tensor v, float q)
 {
+  torch::NoGradGuard no_grad;
+
   torch::Tensor p_hc = forward(v);
-  int c_h = 0;
+  float c_h = 0;
   int i = 0;
 
-  for (; i < p_hc.size(0); i++)
+  for (; i < p_hc.size(1); i++)
   {
-    float p_hc_i = p_hc[i].item<float>();
+    float p_hc_i = p_hc[0][i].item<float>();
     c_h += p_hc_i;
     if (c_h >= q)
       break;

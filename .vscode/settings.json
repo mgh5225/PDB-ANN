@@ -76,7 +76,8 @@
     "valarray": "cpp",
     "variant": "cpp",
     "codecvt": "cpp",
-    "ranges": "cpp"
+    "ranges": "cpp",
+    "*.inc": "cpp"
   },
   "cSpell.words": [
     "dtype",
