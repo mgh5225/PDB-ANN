@@ -17,7 +17,7 @@ The PDB-ANN project aims to implement one of the methodologies mentioned in the 
 
 Before you begin, ensure you have met the following requirements:
 
-- You have installed the latest version of [Libtorch](https://pytorch.org/cppdocs/installing.html). Detailed instructions related to the installation of Libtorch can be found on the linked page.
+- You have installed the latest version of [LibTorch](https://pytorch.org/cppdocs/installing.html). Detailed instructions related to the installation of LibTorch can be found on the linked page.
 
 - This project extensively utilizes the [nlohmann/json](https://github.com/nlohmann/json) library to facilitate the conversion of models into JSON format. You can download the latest version of this library via [JSON for Modern C++](https://github.com/nlohmann/json/releases/latest).
 
@@ -37,7 +37,7 @@ cd PDB-ANN
 bash build.sh
 ```
 
-> Please be aware that you'll need to update the absolute path to Libtorch in the `CMakeLists.txt` file.
+> Please be aware that you'll need to update the absolute path to LibTorch in the `CMakeLists.txt` file.
 
 ## Usage
 
