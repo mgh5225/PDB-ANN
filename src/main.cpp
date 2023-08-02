@@ -1,11 +1,13 @@
 #include <torch/torch.h>
+#include <nlohmann/json.hpp>
+#include <cxxopts.hpp>
+
 #include <iostream>
 #include <vector>
 #include <memory>
 #include <map>
+#include <optional>
 #include <fstream>
-#include <getopt.h>
-#include <iomanip>
 
 #include "stp/stp.hpp"
 #include "pdb/pdb.hpp"
@@ -17,59 +19,80 @@ using json = nlohmann::json;
 void createPDBs();
 void createDataset();
 void trainQNT();
-void run(std::map<std::string, std::vector<std::string>> run_args);
+void run(std::vector<int> state, std::vector<int> pattern, std::vector<int> dimension, std::optional<std::vector<double>> q);
 std::shared_ptr<QNT> loadQNT();
 
 int main(int argc, char *argv[])
 {
-  option opts[] = {
-      {"pdb", optional_argument, nullptr, 'p'},
-      {"create", optional_argument, nullptr, 'c'},
-      {"train", optional_argument, nullptr, 't'},
-      {"run", required_argument, nullptr, 'r'},
-      {0},
-  };
+  auto options = cxxopts::Options("main", "Pattern Database + ANN");
 
-  while (1)
+  auto glob_options = options.add_options();
+  glob_options("h,help", "Print usage");
+  glob_options("pdb", "Create PDBs");
+  glob_options("create", "Create random database based on created PDBs");
+  glob_options("t,train", "Train ANN");
+  glob_options("r,run", "Run ANN");
+
+  auto run_options = options.add_options("run");
+  run_options("s,state", "State for ANN", cxxopts::value<std::vector<int>>());
+  run_options("p,pattern", "Pattern for ANN", cxxopts::value<std::vector<int>>());
+  run_options("d,dim", "Dimension for ANN", cxxopts::value<std::vector<int>>());
+  run_options("q", "List of q for ANN", cxxopts::value<std::vector<double>>());
+
+  auto result = options.parse(argc, argv);
+
+  if (result.count("help"))
   {
-    const int opt = getopt_long(argc, argv, "p::c::t::r:", opts, 0);
+    std::cout << options.help() << std::endl;
+    exit(0);
+  }
 
-    if (opt == -1)
-      break;
+  if (result.count("pdb"))
+    createPDBs();
 
-    std::map<std::string, std::vector<std::string>> run_args;
-    std::string key = "";
+  if (result.count("create"))
+    createDataset();
 
-    switch (opt)
+  if (result.count("train"))
+    trainQNT();
+
+  if (result.count("run"))
+  {
+    if (!result.count("state"))
     {
-    case 'p':
-      createPDBs();
-      break;
-
-    case 'c':
-      createDataset();
-      break;
-
-    case 't':
-      trainQNT();
-      break;
-
-    case 'r':
-      optind--;
-      while (optind < argc && *argv[optind] != '-')
-      {
-        if (*argv[optind] > '9')
-          key = argv[optind];
-        else
-          run_args[key].push_back(argv[optind]);
-        optind++;
-      }
-      run(run_args);
-      break;
-
-    default:
-      break;
+      std::cerr << "State is not given" << std::endl;
+      exit(-1);
     }
+    if (!result.count("pattern"))
+    {
+      std::cerr << "Pattern is not given" << std::endl;
+      exit(-1);
+    }
+
+    if (!result.count("dim"))
+    {
+      std::cerr << "Dimension is not given" << std::endl;
+      exit(-1);
+    }
+
+    std::vector<int> state = result["state"].as<std::vector<int>>();
+    std::vector<int> pattern = result["pattern"].as<std::vector<int>>();
+    std::vector<int> dimension = result["dim"].as<std::vector<int>>();
+
+    std::optional<std::vector<double>> q = std::nullopt;
+
+    if (result.count("q"))
+    {
+      q = result["q"].as<std::vector<double>>();
+    }
+
+    if (dimension.size() != 2)
+    {
+      std::cerr << "Dimension should be 2d" << std::endl;
+      exit(-1);
+    }
+
+    run(state, pattern, dimension, q);
   }
 
   return 0;
@@ -116,57 +139,15 @@ std::shared_ptr<QNT> loadQNT()
   return QNT::loadQNT();
 }
 
-void run(std::map<std::string, std::vector<std::string>> run_args)
+void run(std::vector<int> state, std::vector<int> pattern, std::vector<int> dimension, std::optional<std::vector<double>> q)
 {
   torch::NoGradGuard no_grad;
 
-  auto perm = run_args.find("perm");
-  auto pat = run_args.find("pat");
-  auto dim = run_args.find("dim");
-  auto q = run_args.find("q");
-
-  if (perm == run_args.end())
-  {
-    std::cerr << "Permutation is not given" << std::endl;
-    return;
-  }
-
-  if (pat == run_args.end())
-  {
-    std::cerr << "Pattern is not given" << std::endl;
-    return;
-  }
-
-  if (dim == run_args.end())
-  {
-    std::cerr << "Dimension is not given" << std::endl;
-    return;
-  }
-
-  if (dim->second.size() != 2)
-  {
-    std::cerr << "Dimension should be 2d" << std::endl;
-    return;
-  }
-
-  auto permutation = std::vector<int>();
-  auto pattern = std::vector<int>();
-
-  for (auto &elem : perm->second)
-  {
-    permutation.push_back(std::stoi(elem));
-  }
-
-  for (auto &elem : pat->second)
-  {
-    pattern.push_back(std::stoi(elem));
-  }
-
-  int width = std::stoi(dim->second[0]);
-  int height = std::stoi(dim->second[1]);
+  int width = dimension[0];
+  int height = dimension[1];
 
   auto stp = STP(width, height);
-  stp.initState(permutation);
+  stp.initState(state);
   stp.toAbstract(pattern);
 
   torch::Tensor dual = stp.getFlattenState(pattern);
@@ -190,15 +171,14 @@ void run(std::map<std::string, std::vector<std::string>> run_args)
 
   std::cout << classes.data() << std::endl;
 
-  if (q != run_args.end())
+  if (q.has_value())
   {
     std::cout << "q"
               << "\t\t"
               << "h" << std::endl;
-    for (auto &elem : q->second)
+    for (auto &elem : q.value())
     {
-      float d_q = std::stof(elem);
-      std::cout << d_q << "\t\t" << qnt->getHeuristic(data, d_q) << std::endl;
+      std::cout << elem << "\t\t" << qnt->getHeuristic(data, elem) << std::endl;
     }
   }
 }

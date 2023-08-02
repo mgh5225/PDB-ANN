@@ -77,9 +77,11 @@
     "variant": "cpp",
     "codecvt": "cpp",
     "ranges": "cpp",
-    "*.inc": "cpp"
+    "*.inc": "cpp",
+    "regex": "cpp"
   },
   "cSpell.words": [
+    "cxxopts",
     "dtype",
     "optim",
     "softmax"
