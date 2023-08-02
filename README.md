@@ -63,7 +63,7 @@ Usage:
 
 ## Example
 
-the output of `./build/main -r --pattern 1,2,3,4 --state 8,7,3,0,4,5,1,6,2 --dim 3,3 -q 1e-2,1e-4,1` is as follow:
+the output of `./build/main -r --pattern 1,2,3,4 --state 8,7,3,0,4,5,1,6,2 --dim 3,3 -q 1e-2,1e-4,1` is as follows:
 
 ```shell
  5.5599e-12  5.7679e-04  9.9942e-01  4.1235e-09  8.6619e-09  2.9172e-10
