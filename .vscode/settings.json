@@ -82,6 +82,7 @@
   },
   "cSpell.words": [
     "cummax",
+    "cumsum",
     "cxxopts",
     "dtype",
     "optim",

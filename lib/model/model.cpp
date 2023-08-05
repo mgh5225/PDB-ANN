@@ -40,6 +40,20 @@ int QNT::getHeuristic(torch::Tensor v, float q)
   return i;
 }
 
+torch::Tensor QNT::getHeuristic(torch::Tensor v, torch::Tensor q)
+{
+  torch::NoGradGuard no_grad;
+
+  torch::Tensor p_hc = forward(v);
+
+  int64_t num_classes = p_hc.size(1);
+
+  torch::Tensor c_h = torch::cumsum(p_hc, 1);
+  torch::Tensor h = torch::ge(c_h, q.reshape({-1, 1}));
+
+  return num_classes - torch::sum(h, 1);
+}
+
 void QNT::train(json params)
 {
   json adam_params = params["adam"];
@@ -174,4 +188,48 @@ double QNT::findQStar(json params)
   }
 
   return q_star;
+}
+
+std::vector<std::tuple<int, int>> QNT::run(json params)
+{
+  torch::NoGradGuard no_grad;
+
+  auto res = std::vector<std::tuple<int, int>>();
+
+  int64_t batch_size = params["batch_size"];
+  json j_dataset = params["dataset"];
+  double q_star = params["q_star"];
+
+  std::string dataset_path = j_dataset["path"];
+
+  auto dataset = STPDataset(dataset_path, 1);
+
+  std::tuple<STPDataset::STPSubset, STPDataset::STPSubset> datasets = dataset.splitDataset();
+
+  auto dataLoaderOptions = torch::data::DataLoaderOptions().batch_size(batch_size);
+
+  auto train_dataset = std::get<0>(datasets).map(torch::data::transforms::Stack<>());
+
+  auto train_data_loader = torch::data::make_data_loader(std::move(train_dataset), dataLoaderOptions);
+
+  for (auto &batch : *train_data_loader)
+  {
+    torch::Tensor data = batch.data;
+    torch::Tensor target = batch.target;
+
+    torch::Tensor f_target = target.flip(1);
+    torch::Tensor s_target = std::get<0>(f_target.cummax(1)).flip(1);
+    torch::Tensor h_target = torch::sum(s_target, 1) - 1;
+
+    torch::Tensor q = torch::full({data.size(0)}, q_star);
+
+    torch::Tensor h = getHeuristic(data, q);
+
+    for (int64_t i = 0; i < data.size(0); i++)
+    {
+      res.push_back(std::make_tuple(h_target[i].item<int>(), h[i].item<int>()));
+    }
+  }
+
+  return res;
 }

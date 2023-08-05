@@ -27,10 +27,12 @@ public:
   QNT();
   torch::Tensor forward(torch::Tensor x);
   int getHeuristic(torch::Tensor v, float q);
+  torch::Tensor getHeuristic(torch::Tensor v, torch::Tensor q);
   void train(json params);
   void saveQNT();
   static std::shared_ptr<QNT> loadQNT();
   double findQStar(json params);
+  std::vector<std::tuple<int, int>> run(json params);
 };
 
 #endif

@@ -20,6 +20,6 @@
     "size": 1024
   },
   "epochs": 100,
-  "q_star": 1.63e-18,
+  "q_star": 9.83022e-8,
   "random_split": 0.7
 }
