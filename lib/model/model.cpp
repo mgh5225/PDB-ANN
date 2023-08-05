@@ -133,3 +133,45 @@ std::shared_ptr<QNT> QNT::loadQNT()
   torch::load(qnt, "data/qnt.pt");
   return qnt;
 }
+
+double QNT::findQStar(json params)
+{
+  torch::NoGradGuard no_grad;
+
+  int64_t batch_size = params["batch_size"];
+  json j_dataset = params["dataset"];
+
+  std::string dataset_path = j_dataset["path"];
+
+  auto dataset = STPDataset(dataset_path, 1);
+
+  std::tuple<STPDataset::STPSubset, STPDataset::STPSubset> datasets = dataset.splitDataset();
+
+  auto dataLoaderOptions = torch::data::DataLoaderOptions().batch_size(batch_size);
+
+  auto train_dataset = std::get<0>(datasets).map(torch::data::transforms::Stack<>());
+
+  auto train_data_loader = torch::data::make_data_loader(std::move(train_dataset), dataLoaderOptions);
+
+  double q_star = 1;
+
+  for (auto &batch : *train_data_loader)
+  {
+    torch::Tensor data = batch.data;
+    torch::Tensor target = batch.target;
+
+    torch::Tensor f_target = target.flip(1);
+    torch::Tensor s_target = std::get<0>(f_target.cummax(1)).flip(1);
+
+    torch::Tensor classes = forward(data);
+
+    torch::Tensor q_v = torch::sum(torch::mul(s_target, classes), 1);
+
+    double min_q_v = torch::min(q_v).item<double>();
+
+    if (min_q_v < q_star)
+      q_star = min_q_v;
+  }
+
+  return q_star;
+}

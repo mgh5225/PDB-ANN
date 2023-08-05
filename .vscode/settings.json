@@ -81,6 +81,7 @@
     "regex": "cpp"
   },
   "cSpell.words": [
+    "cummax",
     "cxxopts",
     "dtype",
     "optim",

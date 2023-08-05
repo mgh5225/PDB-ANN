@@ -26,14 +26,22 @@ STPDataset::STPDataset(std::string path, double random_split)
     _pdb_s.push_back(PDB::fromJSON(j_pdb));
   }
 
-  int64_t split_point = static_cast<int64_t>(random_split * _size);
-
   std::vector<int64_t> indices(_size);
   std::iota(indices.begin(), indices.end(), 0);
   std::random_shuffle(indices.begin(), indices.end());
 
-  _train_indicies = std::vector<int64_t>(indices.begin(), indices.begin() + split_point);
-  _test_indicies = std::vector<int64_t>(indices.begin() + split_point, indices.end());
+  if (random_split > 0 && random_split < 1)
+  {
+    int64_t split_point = static_cast<int64_t>(random_split * _size);
+
+    _train_indicies = std::vector<int64_t>(indices.begin(), indices.begin() + split_point);
+    _test_indicies = std::vector<int64_t>(indices.begin() + split_point, indices.end());
+  }
+  else
+  {
+    _train_indicies = indices;
+    _test_indicies = std::vector<int64_t>(0, 0);
+  }
 }
 
 void STPDataset::generatePDBs(json params)

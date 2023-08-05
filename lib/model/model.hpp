@@ -30,6 +30,7 @@ public:
   void train(json params);
   void saveQNT();
   static std::shared_ptr<QNT> loadQNT();
+  double findQStar(json params);
 };
 
 #endif
