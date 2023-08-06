@@ -5,6 +5,7 @@
 #include <iostream>
 #include <vector>
 #include <memory>
+#include <string>
 #include <map>
 #include <optional>
 #include <fstream>
@@ -19,7 +20,9 @@ using json = nlohmann::json;
 void createPDBs();
 void createDataset();
 void trainQNT();
+void findQStar();
 void run(std::vector<int> state, std::vector<int> pattern, std::vector<int> dimension, std::optional<std::vector<double>> q);
+void runAll();
 std::shared_ptr<QNT> loadQNT();
 
 int main(int argc, char *argv[])
@@ -32,8 +35,10 @@ int main(int argc, char *argv[])
   glob_options("create", "Create random database based on created PDBs");
   glob_options("t,train", "Train ANN");
   glob_options("r,run", "Run ANN");
+  glob_options("f,find", "Find q*");
 
   auto run_options = options.add_options("run");
+  run_options("a,all", "Run on whole dataset");
   run_options("s,state", "State for ANN", cxxopts::value<std::vector<int>>());
   run_options("p,pattern", "Pattern for ANN", cxxopts::value<std::vector<int>>());
   run_options("d,dim", "Dimension for ANN", cxxopts::value<std::vector<int>>());
@@ -56,13 +61,23 @@ int main(int argc, char *argv[])
   if (result.count("train"))
     trainQNT();
 
+  if (result.count("find"))
+    findQStar();
+
   if (result.count("run"))
   {
+    if (result.count("all"))
+    {
+      runAll();
+      exit(0);
+    }
+
     if (!result.count("state"))
     {
       std::cerr << "State is not given" << std::endl;
       exit(-1);
     }
+
     if (!result.count("pattern"))
     {
       std::cerr << "Pattern is not given" << std::endl;
@@ -134,6 +149,21 @@ void trainQNT()
   qnt.saveQNT();
 }
 
+void findQStar()
+{
+  std::ifstream f("data/hyper_params.json");
+
+  json params = json::parse(f);
+
+  f.close();
+
+  auto qnt = loadQNT();
+
+  double q_star = qnt->findQStar(params);
+
+  std::cout << "q* : " << q_star << std::endl;
+}
+
 std::shared_ptr<QNT> loadQNT()
 {
   return QNT::loadQNT();
@@ -180,5 +210,25 @@ void run(std::vector<int> state, std::vector<int> pattern, std::vector<int> dime
     {
       std::cout << elem << "\t\t" << qnt->getHeuristic(data, elem) << std::endl;
     }
+  }
+}
+
+void runAll()
+{
+  std::ifstream f("data/hyper_params.json");
+
+  json params = json::parse(f);
+
+  f.close();
+
+  auto qnt = loadQNT();
+
+  std::vector<std::tuple<std::string, int, int>> res = qnt->run(params);
+
+  std::cout << "State\t\t\tTarget h\tPredicted h" << std::endl;
+
+  for (auto &elem : res)
+  {
+    std::cout << std::get<0>(elem) << "\t" << std::get<1>(elem) << "\t\t" << std::get<2>(elem) << std::endl;
   }
 }

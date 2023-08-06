@@ -53,8 +53,10 @@ Usage:
       --create  Create random database based on created PDBs
   -t, --train   Train ANN
   -r, --run     Run ANN
+  -f, --find    Find q*
 
  run options:
+  -a, --all          Run on whole dataset
   -s, --state arg    State for ANN
   -p, --pattern arg  Pattern for ANN
   -d, --dim arg      Dimension for ANN
