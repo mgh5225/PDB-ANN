@@ -165,13 +165,13 @@ double QNT::findQStar(json params)
 
   auto dataLoaderOptions = torch::data::DataLoaderOptions().batch_size(batch_size);
 
-  auto train_dataset = std::get<0>(datasets).map(torch::data::transforms::Stack<>());
+  auto whole_dataset = std::get<0>(datasets).map(torch::data::transforms::Stack<>());
 
-  auto train_data_loader = torch::data::make_data_loader(std::move(train_dataset), dataLoaderOptions);
+  auto whole_data_loader = torch::data::make_data_loader(std::move(whole_dataset), dataLoaderOptions);
 
   double q_star = 1;
 
-  for (auto &batch : *train_data_loader)
+  for (auto &batch : *whole_data_loader)
   {
     torch::Tensor data = batch.data;
     torch::Tensor target = batch.target;
@@ -192,11 +192,11 @@ double QNT::findQStar(json params)
   return q_star;
 }
 
-std::vector<std::tuple<int, int>> QNT::run(json params)
+std::vector<std::tuple<std::string, int, int>> QNT::run(json params)
 {
   torch::NoGradGuard no_grad;
 
-  auto res = std::vector<std::tuple<int, int>>();
+  auto res = std::vector<std::tuple<std::string, int, int>>();
 
   int64_t batch_size = params["batch_size"];
   json j_dataset = params["dataset"];
@@ -211,11 +211,14 @@ std::vector<std::tuple<int, int>> QNT::run(json params)
 
   auto dataLoaderOptions = torch::data::DataLoaderOptions().batch_size(batch_size);
 
-  auto train_dataset = std::get<0>(datasets).map(torch::data::transforms::Stack<>());
+  STPDataset::STPSubset whole_dataset = std::get<0>(datasets);
+  auto map_whole_dataset = whole_dataset.map(torch::data::transforms::Stack<>());
 
-  auto train_data_loader = torch::data::make_data_loader(std::move(train_dataset), dataLoaderOptions);
+  auto whole_data_loader = torch::data::make_data_loader<torch::data::samplers::SequentialSampler>(std::move(map_whole_dataset), dataLoaderOptions);
 
-  for (auto &batch : *train_data_loader)
+  int64_t batch_idx = 0;
+
+  for (auto &batch : *whole_data_loader)
   {
     torch::Tensor data = batch.data;
     torch::Tensor target = batch.target;
@@ -230,8 +233,17 @@ std::vector<std::tuple<int, int>> QNT::run(json params)
 
     for (int64_t i = 0; i < data.size(0); i++)
     {
-      res.push_back(std::make_tuple(h_target[i].item<int>(), h[i].item<int>()));
+      json row = whole_dataset.at(batch_idx + i);
+      std::vector<int> permutation = row["permutation"];
+
+      std::stringstream state;
+
+      std::copy(permutation.begin(), permutation.end(), std::ostream_iterator<int>(state, " "));
+
+      res.push_back(std::make_tuple(state.str(), h_target[i].item<int>(), h[i].item<int>()));
     }
+
+    batch_idx += data.size(0);
   }
 
   return res;

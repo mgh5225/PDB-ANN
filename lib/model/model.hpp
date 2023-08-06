@@ -32,7 +32,7 @@ public:
   void saveQNT();
   static std::shared_ptr<QNT> loadQNT();
   double findQStar(json params);
-  std::vector<std::tuple<int, int>> run(json params);
+  std::vector<std::tuple<std::string, int, int>> run(json params);
 };
 
 #endif

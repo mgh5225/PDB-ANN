@@ -218,10 +218,15 @@ void STPDataset::save(std::string path, std::string pdb_s_path)
   f_pdb_s.close();
 }
 
+json STPDataset::at(size_t index)
+{
+  return _dataset[index];
+}
+
 torch::data::Example<> STPDataset::get(size_t index, int heuristic_idx)
 {
 
-  json row = _dataset[index];
+  json row = at(index);
 
   std::vector<int> f_state = row["permutation"];
   std::vector<json> heuristics = row["heuristics"];
@@ -290,4 +295,11 @@ torch::data::Example<> STPDataset::STPSubset::get(size_t index)
 torch::optional<size_t> STPDataset::STPSubset::size() const
 {
   return _indicies->size();
+}
+
+json STPDataset::STPSubset::at(size_t index)
+{
+  int64_t idx = _indicies->at(index);
+
+  return _dataset->at(idx);
 }

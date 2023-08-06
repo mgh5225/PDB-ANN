@@ -35,6 +35,7 @@ public:
   static void generateRandom(json params);
   json toJSON();
   void save(std::string path, std::string pdb_s_path);
+  json at(size_t index);
   torch::data::Example<> get(size_t index, int heuristic_idx = 0);
 
   class STPSubset : public torch::data::Dataset<STPSubset>
@@ -48,6 +49,7 @@ public:
     explicit STPSubset(std::shared_ptr<STPDataset> dataset, std::shared_ptr<std::vector<int64_t>> indicies, int heuristic_idx);
     torch::data::Example<> get(size_t index) override;
     torch::optional<size_t> size() const override;
+    json at(size_t index);
   };
 
   std::tuple<STPDataset::STPSubset, STPDataset::STPSubset> splitDataset(int heuristic_idx = 0);
