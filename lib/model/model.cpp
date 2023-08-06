@@ -71,6 +71,7 @@ void QNT::train(json params)
   std::string dataset_path = j_dataset["path"];
   int64_t epochs = params["epochs"];
   double random_split = params["random_split"];
+  int heuristic_idx = params["heuristic_idx"];
 
   auto adamOptions = torch::optim::AdamOptions().lr(alpha).betas(betas).eps(epsilon);
 
@@ -80,7 +81,7 @@ void QNT::train(json params)
 
   auto dataset = STPDataset(dataset_path, random_split);
 
-  std::tuple<STPDataset::STPSubset, STPDataset::STPSubset> datasets = dataset.splitDataset();
+  std::tuple<STPDataset::STPSubset, STPDataset::STPSubset> datasets = dataset.splitDataset(heuristic_idx);
 
   auto dataLoaderOptions = torch::data::DataLoaderOptions().batch_size(batch_size);
 
@@ -154,12 +155,13 @@ double QNT::findQStar(json params)
 
   int64_t batch_size = params["batch_size"];
   json j_dataset = params["dataset"];
+  int heuristic_idx = params["heuristic_idx"];
 
   std::string dataset_path = j_dataset["path"];
 
   auto dataset = STPDataset(dataset_path, 1);
 
-  std::tuple<STPDataset::STPSubset, STPDataset::STPSubset> datasets = dataset.splitDataset();
+  std::tuple<STPDataset::STPSubset, STPDataset::STPSubset> datasets = dataset.splitDataset(heuristic_idx);
 
   auto dataLoaderOptions = torch::data::DataLoaderOptions().batch_size(batch_size);
 
@@ -199,12 +201,13 @@ std::vector<std::tuple<int, int>> QNT::run(json params)
   int64_t batch_size = params["batch_size"];
   json j_dataset = params["dataset"];
   double q_star = params["q_star"];
+  int heuristic_idx = params["heuristic_idx"];
 
   std::string dataset_path = j_dataset["path"];
 
   auto dataset = STPDataset(dataset_path, 1);
 
-  std::tuple<STPDataset::STPSubset, STPDataset::STPSubset> datasets = dataset.splitDataset();
+  std::tuple<STPDataset::STPSubset, STPDataset::STPSubset> datasets = dataset.splitDataset(heuristic_idx);
 
   auto dataLoaderOptions = torch::data::DataLoaderOptions().batch_size(batch_size);
 

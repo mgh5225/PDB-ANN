@@ -261,29 +261,30 @@ torch::data::Example<> STPDataset::get(size_t index, int heuristic_idx)
   return torch::data::Example<>({data, target});
 }
 
-std::tuple<STPDataset::STPSubset, STPDataset::STPSubset> STPDataset::splitDataset()
+std::tuple<STPDataset::STPSubset, STPDataset::STPSubset> STPDataset::splitDataset(int heuristic_idx)
 {
   auto dataset = std::make_shared<STPDataset>(*this);
   auto train_indicies = std::make_shared<std::vector<int64_t>>(_train_indicies);
   auto test_indicies = std::make_shared<std::vector<int64_t>>(_test_indicies);
 
-  auto trainDataset = STPSubset(dataset, train_indicies);
-  auto testDataset = STPSubset(dataset, test_indicies);
+  auto trainDataset = STPSubset(dataset, train_indicies, heuristic_idx);
+  auto testDataset = STPSubset(dataset, test_indicies, heuristic_idx);
 
   return std::make_tuple(trainDataset, testDataset);
 }
 
-STPDataset::STPSubset::STPSubset(std::shared_ptr<STPDataset> dataset, std::shared_ptr<std::vector<int64_t>> indicies)
+STPDataset::STPSubset::STPSubset(std::shared_ptr<STPDataset> dataset, std::shared_ptr<std::vector<int64_t>> indicies, int heuristic_idx)
 {
   _dataset = dataset;
   _indicies = indicies;
+  _heuristic_idx = heuristic_idx;
 }
 
 torch::data::Example<> STPDataset::STPSubset::get(size_t index)
 {
   int64_t idx = _indicies->at(index);
 
-  return _dataset->get(idx);
+  return _dataset->get(idx, _heuristic_idx);
 }
 
 torch::optional<size_t> STPDataset::STPSubset::size() const

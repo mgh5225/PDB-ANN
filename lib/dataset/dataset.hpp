@@ -42,13 +42,14 @@ public:
   private:
     std::shared_ptr<STPDataset> _dataset;
     std::shared_ptr<std::vector<int64_t>> _indicies;
+    int _heuristic_idx;
 
   public:
-    explicit STPSubset(std::shared_ptr<STPDataset> dataset, std::shared_ptr<std::vector<int64_t>> indicies);
+    explicit STPSubset(std::shared_ptr<STPDataset> dataset, std::shared_ptr<std::vector<int64_t>> indicies, int heuristic_idx);
     torch::data::Example<> get(size_t index) override;
     torch::optional<size_t> size() const override;
   };
 
-  std::tuple<STPDataset::STPSubset, STPDataset::STPSubset> splitDataset();
+  std::tuple<STPDataset::STPSubset, STPDataset::STPSubset> splitDataset(int heuristic_idx = 0);
 };
 #endif

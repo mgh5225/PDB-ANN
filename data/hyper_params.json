@@ -19,6 +19,7 @@
     "pdb_s": "data/pdb_s.json",
     "size": 1024
   },
+  "heuristic_idx": 0,
   "epochs": 100,
   "q_star": 9.83022e-8,
   "random_split": 0.7
